@@ -55,14 +55,6 @@ void movePlayer(player *element, char steps, unsigned char trajectory, unsigned 
                 element->speed_y = INITIAL_JUMP_SPEED;
             }
             break;
-
-           
-        case 3:  // Move down
-            if (!element->isDown) {
-                element->isDown = true;
-                element->height = element->originalHeight/2;
-            }
-            break;
         
         
         case 4: // Move up left

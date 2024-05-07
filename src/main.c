@@ -1,4 +1,4 @@
-//Compilação: gcc main.c character.c joystick.c street_fighter.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
+//Compilação: gcc main.c character.c joystick.c street_fighter.c menu.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags)
 
 #include "street_fighter.h"		
 
@@ -109,9 +109,21 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
     } else if (al_key_down(key_state, ALLEGRO_KEY_DOWN)) {
         joystick_down(player_2->control);
     }
+    
+    if (!al_key_down(key_state, DOWN_1)) player_1->height = player_1->originalHeight;	
+    else {
+        player_1->y = Y_SCREEN;		
+        player_1->height = player_1->originalHeight/2;		
+    }		
+    if (!al_key_down(key_state, DOWN_2)) player_2->height = player_1->originalHeight;	
+    else {
+        player_2->y = Y_SCREEN;		
+        player_2->height = player_2->originalHeight/2;		
+    }																															
+
 }
 
-void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2) {
+void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename) {
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
@@ -120,13 +132,14 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     ALLEGRO_KEYBOARD_STATE key_state;
 
     background bg;
-    init_animated_background(&bg, 24.0);  // Supondo que já foi definido em algum lugar
+    init_animated_background(&bg, 24.0, filename);  //supondo que já foi definido em algum lugar
 
     while (true) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
 
         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+            *state = EXIT;
             break;
         }
 
@@ -167,7 +180,7 @@ int main() {
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     al_register_event_source(queue, al_get_display_event_source(disp));
 
-    // Registra o teclado como fonte de eventos
+    //registra o teclado como fonte de eventos
     al_register_event_source(queue, al_get_keyboard_event_source());
 
     player* player_1 = buildPlayer(20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 40);
@@ -181,22 +194,32 @@ int main() {
     
     int state = MENU;
     int selected_option = MENU_START;
+    int selected_image = 0;
+    char filename[100];
     
     while (state != EXIT) {
         ALLEGRO_EVENT event;
-        draw_menu(font, selected_option); // Não é necessário desenhar o menu aqui, removido para evitar duplicação
+        draw_menu(font, selected_option); 
         al_wait_for_event(queue, &event);
 
         switch (state) {
-            case MENU:
-                draw_menu(font, selected_option); // Desenha o menu somente quando estiver no estado MENU
-                if (event.type == ALLEGRO_EVENT_KEY_DOWN) { // Só tenta lidar com a entrada se for um evento de teclado
+            case IMG_MENU:
+               // printf("DoWM/nDoWM/nDoWM/nDoWM/nDoWM/nDoWM/nDoWM/n"); fflush(stdout);
+                draw_img_menu(font, selected_image);
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN) { 
+                    state = handle_menu_input(event, &selected_option);
+                }
+                break;
+            case MENU:            
+                draw_menu(font, selected_option); 
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN) { 
                     state = handle_menu_input(event, &selected_option);
                 }
                 break;
             case GAME:
-                run_game(disp, queue, player_1, player_2); // Lógica do jogo
-                state = MENU; // Retorna ao menu após a execução do jogo
+                strcpy(filename,"destroyed_dojo");
+                //filename = file_choose;
+                run_game(disp, queue, player_1, player_2, &state, filename); 
                 break;
         }
         

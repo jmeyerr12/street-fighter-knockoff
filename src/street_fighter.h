@@ -34,7 +34,7 @@
 typedef struct {
     ALLEGRO_BITMAP* frames[NUM_FRAMES];
     int current_frame;
-    float frame_duration;  // Duração de cada frame em segundos
+    float frame_duration;  //duração de cada frame em segundos
     double last_frame_update_time;
 } background;
 
@@ -46,7 +46,7 @@ typedef struct {
     int right;
 } keyState;
 
-void init_animated_background(background* bg, float frame_rate);
+void init_animated_background(background* bg, float frame_rate, char *filename);
 void update_animated_background(background* bg);
 void draw_animated_background(const background* bg);
 void destroy_animated_background(background* bg);
