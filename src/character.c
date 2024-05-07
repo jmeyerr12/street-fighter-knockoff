@@ -30,6 +30,15 @@ void updatePlayer(player *element, float time, unsigned short groundLevel) {
         element->speed_x = 0;
     }
 }
+																
+void resetPlayer(player *element) {
+    element->control->right = 0;
+    element->control->left = 0;	
+    element->control->up = 0;
+    //element->control->down = 0;
+    element->control->up_left = 0;
+    element->control->up_right = 0;
+}
 
 void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y) {
     switch (trajectory) {

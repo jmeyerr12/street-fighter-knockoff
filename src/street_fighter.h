@@ -9,13 +9,14 @@
 
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
-#include <allegro5/allegro_primitives.h>	
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>	
 
 #include "character.h"
 #include "joystick.h"
 
-#define X_SCREEN 320								
-#define Y_SCREEN 320	
+#define X_SCREEN 600								
+#define Y_SCREEN 300	
 
 #define UP_1 23
 #define DOWN_1 19
@@ -27,11 +28,26 @@
 #define LEFT_2 82
 #define RIGHT_2 83
 
+#define NUM_FRAMES 8  
+
+typedef struct {
+    ALLEGRO_BITMAP* frames[NUM_FRAMES];
+    int current_frame;
+    float frame_duration;  // Duração de cada frame em segundos
+    double last_frame_update_time;
+} background;
+
+
 typedef struct {
     int up;
     int down;
     int left;
     int right;
 } keyState;
+
+void init_animated_background(background* bg, float frame_rate);
+void update_animated_background(background* bg);
+void draw_animated_background(const background* bg);
+void destroy_animated_background(background* bg);
 
 #endif

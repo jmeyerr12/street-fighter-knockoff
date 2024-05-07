@@ -1,4 +1,4 @@
-//Compilação: gcc main.c character.c joystick.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
+//Compilação: gcc main.c character.c joystick.c street_fighter.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 --libs --cflags)
 
 #include "street_fighter.h"		
 
@@ -75,7 +75,12 @@ int main(){
 	ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);						
 	ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();			
 	ALLEGRO_FONT* font = al_create_builtin_font();							
-	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);							
+	ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);			
+	
+	al_init_image_addon();
+	
+	background bg;		
+	init_animated_background(&bg, 24.0);  // Inicializa com uma taxa de 24 frames por segundo
 
 	al_register_event_source(queue, al_get_keyboard_event_source());		
 	al_register_event_source(queue, al_get_display_event_source(disp));	
@@ -107,25 +112,20 @@ int main(){
 		    double currentTime = al_get_time();
             float deltaTime = currentTime - lastTime; 
             lastTime = currentTime; 
+            
+            update_animated_background(&bg);
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            draw_animated_background(&bg);
 		
 			update_position(player_1, player_2, deltaTime);										
-			al_clear_to_color(al_map_rgb(0, 0, 0));										
 			al_draw_filled_rectangle(player_1->x-player_1->side/2, player_1->y-player_1->height/2, player_1->x+player_1->side/2, player_1->y+player_1->height/2, al_map_rgb(255, 0, 0));
 			al_draw_filled_rectangle(player_2->x-player_2->side/2, player_2->y-player_2->height/2, player_2->x+player_2->side/2, player_2->y+player_2->height/2, al_map_rgb(0, 0, 255));			
-    		al_flip_display();
     		
-    		player_1->control->right = 0;
-    		player_1->control->left = 0;	
-    		player_1->control->up = 0;
-    		//player_1->control->down = 0;
-    		player_1->control->up_left = 0;
-    		player_1->control->up_right = 0;	
-    		player_2->control->right = 0;
-    		player_2->control->left = 0;	
-    		player_2->control->up = 0;
-    		//player_2->control->down = 0;
-    		player_2->control->up_left = 0;
-    		player_2->control->up_right = 0;																																						
+
+            al_flip_display();
+    		
+    		resetPlayer(player_1);
+    		resetPlayer(player_2);																																					
 		} 
         if (al_key_down(&key_state, UP_1)) {
             if (al_key_down(&key_state, RIGHT_1)) {
@@ -173,7 +173,8 @@ int main(){
 																																	
 	}
 
-	al_destroy_font(font);																																											
+	al_destroy_font(font);	
+	destroy_animated_background(&bg);																																									
 	al_destroy_display(disp);																																										
 	al_destroy_timer(timer);																																										
 	al_destroy_event_queue(queue);																																									

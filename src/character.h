@@ -22,5 +22,6 @@ player* buildPlayer(unsigned char side, unsigned short x, unsigned short y, unsi
 void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);			
 void destroyPlayer(player *element);					
 void updatePlayer(player *element, float time, unsigned short groundLevel);																	
+void resetPlayer(player *element);
 
 #endif																													
