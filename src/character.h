@@ -3,7 +3,8 @@
 
 #include "joystick.h"	
 #include <stdbool.h>		
-#include <stdio.h>																								
+#include <stdio.h>	
+#include <stdlib.h>																							
 
 #define STEP 10		
 #define GRAVITY 75
@@ -23,5 +24,6 @@ void movePlayer(player *element, char steps, unsigned char trajectory, unsigned 
 void destroyPlayer(player *element);					
 void updatePlayer(player *element, float time, unsigned short groundLevel);																	
 void resetPlayer(player *element);
+void update_position(player *player_1, player *player_2, float time);
 
 #endif																													

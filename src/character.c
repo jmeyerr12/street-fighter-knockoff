@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "character.h"
 
 player* buildPlayer(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height){						
