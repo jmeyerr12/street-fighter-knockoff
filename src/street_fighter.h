@@ -14,6 +14,7 @@
 
 #include "character.h"
 #include "joystick.h"
+#include "menu.h"
 
 #define X_SCREEN 600								
 #define Y_SCREEN 300	
