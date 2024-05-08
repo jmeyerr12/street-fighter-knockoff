@@ -1,4 +1,4 @@
-//Compilação: gcc main.c character.c joystick.c street_fighter.c menu.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags)
+//Compilação: gcc main.c character.c joystick.c street_fighter.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags)
 
 #include "street_fighter.h"		
 
@@ -180,7 +180,6 @@ int main() {
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     al_register_event_source(queue, al_get_display_event_source(disp));
 
-    //registra o teclado como fonte de eventos
     al_register_event_source(queue, al_get_keyboard_event_source());
 
     player* player_1 = buildPlayer(20, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 40);
@@ -203,13 +202,6 @@ int main() {
         al_wait_for_event(queue, &event);
 
         switch (state) {
-            case IMG_MENU:
-               // printf("DoWM/nDoWM/nDoWM/nDoWM/nDoWM/nDoWM/nDoWM/n"); fflush(stdout);
-                draw_img_menu(font, selected_image);
-                if (event.type == ALLEGRO_EVENT_KEY_DOWN) { 
-                    state = handle_menu_input(event, &selected_option);
-                }
-                break;
             case MENU:            
                 draw_menu(font, selected_option); 
                 if (event.type == ALLEGRO_EVENT_KEY_DOWN) { 
@@ -217,7 +209,9 @@ int main() {
                 }
                 break;
             case GAME:
-                strcpy(filename,"destroyed_dojo");
+                selected_image = show_image_menu(font, queue);
+                if (selected_image == 0) strcpy(filename,"destroyed_dojo");
+                else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 //filename = file_choose;
                 run_game(disp, queue, player_1, player_2, &state, filename); 
                 break;
