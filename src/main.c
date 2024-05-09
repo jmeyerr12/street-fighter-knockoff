@@ -123,7 +123,7 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
 
 }
 
-void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename) {
+void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, ALLEGRO_FONT *font) {
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
@@ -131,39 +131,47 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     double lastTime = al_get_time();
     ALLEGRO_KEYBOARD_STATE key_state;
 
+    int running = 1;
     background bg;
     init_animated_background(&bg, 24.0, filename);  //supondo que já foi definido em algum lugar
 
     while (true) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
+        
+        if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+            running = !running;
+        } 
 
-        if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
-            *state = EXIT;
-            break;
-        }
+        if (running) {
+            if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                *state = EXIT;
+                break;
+            }
 
-        if (event.type == ALLEGRO_EVENT_TIMER) {
-            double currentTime = al_get_time();
-            float deltaTime = currentTime - lastTime;
-            lastTime = currentTime;
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                double currentTime = al_get_time();
+                float deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
 
-            update_animated_background(&bg);
-            al_clear_to_color(al_map_rgb(0, 0, 0));
-            draw_animated_background(&bg);
+                update_animated_background(&bg);
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                draw_animated_background(&bg);
 
-            ALLEGRO_KEYBOARD_STATE key_state;
-            al_get_keyboard_state(&key_state);
-            handle_input(&key_state, player_1, player_2);
+                ALLEGRO_KEYBOARD_STATE key_state;
+                al_get_keyboard_state(&key_state);
+                handle_input(&key_state, player_1, player_2);
 
-            update_position(player_1, player_2, deltaTime);                                        
-            draw_players(player_1, player_2);
+                update_position(player_1, player_2, deltaTime); 
+                draw_scoreboard(100,100,X_SCREEN,Y_SCREEN,font);                                       
+                draw_players(player_1, player_2);
 
-            al_flip_display();
+                al_flip_display();
 
-            resetPlayer(player_1);
-            resetPlayer(player_2);
-        }
+                resetPlayer(player_1);
+                resetPlayer(player_2);
+            }
+        } 
     }
     
     al_destroy_timer(timer);
@@ -213,7 +221,7 @@ int main() {
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 //filename = file_choose;
-                run_game(disp, queue, player_1, player_2, &state, filename); 
+                run_game(disp, queue, player_1, player_2, &state, filename, font); 
                 break;
         }
         

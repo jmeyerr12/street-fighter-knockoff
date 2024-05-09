@@ -40,11 +40,9 @@
 #define NUM_SPRITES 10
 
 typedef struct {
-    ALLEGRO_BITMAP* sprites[NUM_SPRITES];
-    int current_frame;
-    float frame_width;
-    float frame_height;
-    int max_frames;
+    ALLEGRO_BITMAP* frames[NUM_SPRITES];
+    int current_frame, max_frames;
+    float frame_width, frame_height;
 } sprite;
 
 typedef struct {
@@ -61,6 +59,7 @@ typedef struct {
     int right;
 } keyState;
 
+void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font);
 void draw_menu(ALLEGRO_FONT* font, int selected_option);
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option);
 int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue);
