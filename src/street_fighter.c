@@ -17,26 +17,6 @@ void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font) {
                              x/2, 20, al_map_rgb(0, 0, 255));
 }
 
-void init_sprite(sprite *sp, char *folder, int frame_width, int frame_height, int n) {
-    sp->current_frame = 0;
-    sp->frame_width = frame_width;
-    sp->frame_height = frame_height;
-    sp->max_frames = n;
-    for (int i = 0; i < n && i < NUM_SPRITES; i++) {
-        char filename[500];
-        snprintf(filename, sizeof(filename), "../assets/characters/%s/sprite-%d", folder, i);
-        sp->frames[i] = al_load_bitmap(filename);
-        if (!sp->frames[i]) {
-            fprintf(stderr, "Failed to load frame %d. - SPRITE %s\n", i, filename);
-            exit(-1);
-        }
-    }
-} 
-
-void draw_sprite(sprite *sp, float x, float y) {
-    al_draw_bitmap(sp->frames[sp->current_frame], x, y, 0);
-}
-
 void init_animated_background(background* bg, float frame_rate, char *folder) {
     bg->current_frame = 0;
     bg->frame_duration = 1.0 / frame_rate;

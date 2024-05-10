@@ -38,12 +38,7 @@
 #define MENU_EXIT 1
 
 #define NUM_SPRITES 10
-
-typedef struct {
-    ALLEGRO_BITMAP* frames[NUM_SPRITES];
-    int current_frame, max_frames;
-    float frame_width, frame_height;
-} sprite;
+#define NUM_MOVES 6 //idle,jump,walk,down,jump fwd, jump bck
 
 typedef struct {
     ALLEGRO_BITMAP* frames[NUM_FRAMES];

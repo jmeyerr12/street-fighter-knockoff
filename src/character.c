@@ -1,7 +1,10 @@
 #include "character.h"
 
 player* buildPlayer(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height){						
-	if ((x - side/2 < 0) || (x + side/2 > max_x) || (y - side/2 < 0) || (y + side/2 > max_y)) return NULL;					
+	if ((x < 0) || (x > max_x) || (y < 0) || (y > max_y)) {
+        fprintf(stderr, "Failed to allocate memory for player\n");
+        return NULL;
+    }			
 	player *new = (player*) malloc(sizeof(player));				
     if (!new) {
         fprintf(stderr, "Failed to allocate memory for player\n");
@@ -42,11 +45,11 @@ void resetPlayer(player *element) {
 void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y) {
     switch (trajectory) {
         case 0:  // Move left
-            if (((element->x - steps * STEP) - element->side / 2 >= 0) && !element->isJumping) element->x -= steps * STEP;
+            if (((element->x - steps * STEP) - element->side >= 0) && !element->isJumping) element->x -= steps * STEP;
             break;
         
         case 1:  // Move right
-            if (((element->x + steps * STEP) + element->side / 2 <= max_x) && !element->isJumping) element->x += steps * STEP;
+            if (((element->x + steps * STEP) + element->side <= max_x) && !element->isJumping) element->x += steps * STEP;
             break;
 
         case 2:  // Move up 

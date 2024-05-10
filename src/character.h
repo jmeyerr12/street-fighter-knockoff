@@ -1,10 +1,15 @@
-#ifndef __SQUARE__ 																												
-#define __SQUARE__																																																					
+#ifndef __CHARACTER__ 																												
+#define __CHARACTER__																																																					
 
 #include "joystick.h"	
 #include <stdbool.h>		
 #include <stdio.h>	
-#include <stdlib.h>																							
+#include <stdlib.h>				
+
+#include <allegro5/allegro5.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_primitives.h>
+#include <allegro5/allegro_image.h>																				
 
 #define STEP 10		
 #define GRAVITY 75
