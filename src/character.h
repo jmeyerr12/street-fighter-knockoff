@@ -9,25 +9,42 @@
 #include <allegro5/allegro5.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_primitives.h>
-#include <allegro5/allegro_image.h>																				
+#include <allegro5/allegro_image.h>			
 
-#define STEP 10		
-#define GRAVITY 75
-#define INITIAL_JUMP_SPEED -100.0																					
+#define ATTACK_PUNCH 1
+#define ATTACK_KICK 2
+
+#define STEP 2	
+#define GRAVITY 110
+#define INITIAL_JUMP_SPEED -130.0	
+
+#define IDLE 0
+#define WALK 1
+#define PUNCH 2
+#define KICK 3
+#define GET_DOWN 4
+#define JUMP 5
+#define JUMP_FWD 6
+#define JUMP_BCK 7
+
+#define SPRITE_HEIGHT 112
+#define SPRITE_WIDTH 112
 
 typedef struct {
-    unsigned char side, height, originalHeight;
+    unsigned char width, height, originalHeight;
     unsigned short x, y;
+    unsigned int health;
     joystick *control;
     float speed_y, speed_x;         
-    bool isJumping;     
+    int isJumping;  
+    int attack;
     bool isDown;
 } player;
 																											
-player* buildPlayer(unsigned char side, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height);		
+player* buildPlayer(unsigned char width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height);	
 void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);			
 void destroyPlayer(player *element);					
-void updatePlayer(player *element, float time, unsigned short groundLevel);																	
+void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned short bounds);																	
 void resetPlayer(player *element);
 void update_position(player *player_1, player *player_2, float time);
 
