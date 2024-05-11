@@ -31,8 +31,8 @@
 #define SPRITE_WIDTH 112
 
 typedef struct {
-    unsigned char width, height, originalHeight;
-    unsigned short x, y;
+    unsigned int width, height, originalHeight;
+    unsigned int x, y;
     unsigned int health;
     joystick *control;
     float speed_y, speed_x;         
@@ -41,10 +41,10 @@ typedef struct {
     bool isDown;
 } player;
 																											
-player* buildPlayer(unsigned char width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height);	
-void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y);			
+player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height);	
+void movePlayer(player *element, char steps, unsigned char trajectory);			
 void destroyPlayer(player *element);					
-void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned short bounds);																	
+void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds);																	
 void resetPlayer(player *element);
 void update_position(player *player_1, player *player_2, float time);
 

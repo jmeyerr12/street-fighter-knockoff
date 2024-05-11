@@ -10,7 +10,7 @@ unsigned char collision_2D(player *element_first, player *element_second) {
     //fflush(stdout);
 
     int overlap_x = (element_first->x+6 > element_second->x) &&  //6 é um threshold
-                    (element_first->x < element_second->x);
+                    (element_first->x < element_second->x+6);
 
     int overlap_y = (element_first->y > element_second->y - element_second->height) && 
                     (element_first->y - element_first->height < element_second->y);
@@ -18,63 +18,116 @@ unsigned char collision_2D(player *element_first, player *element_second) {
     return overlap_x && overlap_y;
 }
 
+void try_move_player(player* p, player* other, int multiplier, int direction) {
+    movePlayer(p, multiplier, direction);
+    if (collision_2D(p, other)) {
+        movePlayer(p, -multiplier, direction);
+    }
+}
 
-void update_position(player *player_1, player *player_2, float time){																															
-    if (player_1->control->up_right) {																																							
-		movePlayer(player_1, 1, 5, X_SCREEN, Y_SCREEN);																																		
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 5, X_SCREEN, Y_SCREEN);																								
-	}
-	if (player_1->control->up_left) {																																							
-		movePlayer(player_1, 1, 4, X_SCREEN, Y_SCREEN);																																		
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 4, X_SCREEN, Y_SCREEN);																								
-	}
-	if (player_1->control->left) {																																							
-		movePlayer(player_1, 1, 0, X_SCREEN, Y_SCREEN);																																		
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 0, X_SCREEN, Y_SCREEN);																								
-	}
-	if (player_1->control->right) {																																							
-		movePlayer(player_1, 1, 1, X_SCREEN, Y_SCREEN);																																	
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 1, X_SCREEN, Y_SCREEN);																							
-	}
-	if (player_1->control->up) {																															
-		movePlayer(player_1, 1, 2, X_SCREEN, Y_SCREEN);																								
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 2, X_SCREEN, Y_SCREEN);															
-	}
-	if (player_1->control->down) {																											
-		movePlayer(player_1, 1, 3, X_SCREEN, Y_SCREEN);																						
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 3, X_SCREEN, Y_SCREEN);										
-	}
+void update_position(player *player_1, player *player_2, float time) {
+    if (player_1->control->up_right) {
+        try_move_player(player_1, player_2, 1, 5);
+    }
+    if (player_1->control->up_left) {
+        try_move_player(player_1, player_2, 1, 4);
+    }
+    // Adicione mais direções aqui conforme necessário
+    if (player_1->control->left) {
+        try_move_player(player_1, player_2, 1, 0);
+    }
+    if (player_1->control->right) {
+        try_move_player(player_1, player_2, 1, 1);
+    }
+    if (player_1->control->up) {
+        try_move_player(player_1, player_2, 1, 2);
+    }
+    if (player_1->control->down) {
+        try_move_player(player_1, player_2, 1, 3);
+    }
 
-    if (player_2->control->up_right) {																																		
-		movePlayer(player_2, 1, 5, X_SCREEN, Y_SCREEN);																																		
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 5, X_SCREEN, Y_SCREEN);																								
-	}
-	if (player_2->control->up_left) {																																					
-		movePlayer(player_2, 1, 4, X_SCREEN, Y_SCREEN);																																		
-		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 4, X_SCREEN, Y_SCREEN);																								
-	}
-	if (player_2->control->left) {														
-		movePlayer(player_2, 1, 0, X_SCREEN, Y_SCREEN);						
-		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 0, X_SCREEN, Y_SCREEN);		
-	}
-	
-	if (player_2->control->right) { 						
-		movePlayer(player_2, 1, 1, X_SCREEN, Y_SCREEN);		
-		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 1, X_SCREEN, Y_SCREEN);		
-	}
-	
-	if (player_2->control->up) {									
-		movePlayer(player_2, 1, 2, X_SCREEN, Y_SCREEN);		
-		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 2, X_SCREEN, Y_SCREEN);	
-	}
-	if (player_2->control->down) {		
-		movePlayer(player_2, 1, 3, X_SCREEN, Y_SCREEN);						
-		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 3, X_SCREEN, Y_SCREEN);						
-	}
+    if (player_2->control->up_right) {
+        try_move_player(player_2, player_1, 1, 5);
+    }
+    if (player_2->control->up_left) {
+        try_move_player(player_2, player_1, 1, 4);
+    }
+    // Adicione mais direções aqui conforme necessário
+    if (player_2->control->left) {
+        try_move_player(player_2, player_1, 1, 0);
+    }
+    if (player_2->control->right) {
+        try_move_player(player_2, player_1, 1, 1);
+    }
+    if (player_2->control->up) {
+        try_move_player(player_2, player_1, 1, 2);
+    }
+    if (player_2->control->down) {
+        try_move_player(player_2, player_1, 1, 3);
+    }
 
     updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
 }
+
+
+
+/*void update_position(player *player_1, player *player_2, float time){																															
+    if (player_1->control->up_right) {																																							
+		movePlayer(player_1, 1, 5);																																		
+		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 5);																								
+	}
+	if (player_1->control->up_left) {																																							
+		movePlayer(player_1, 1, 4, X_SCREEN, Y_SCREEN);																																		
+		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 4);																								
+	}
+	if (player_1->control->left) {																																							
+		//movePlayer(player_1, 1, 0, X_SCREEN, Y_SCREEN);																																		
+		if (!collision_2D(player_1, player_2)) movePlayer(player_1, 1, 0);																								
+	}
+	if (player_1->control->right) {																																							
+		//movePlayer(player_1, 1, 1, X_SCREEN, Y_SCREEN);																																	
+		if (!collision_2D(player_1, player_2)) movePlayer(player_1, 1, 1);																							
+	}
+	if (player_1->control->up) {																															
+		movePlayer(player_1, 1, 2);																								
+		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 2);															
+	}
+	if (player_1->control->down) {																											
+		movePlayer(player_1, 1, 3);																						
+		if (collision_2D(player_1, player_2)) movePlayer(player_1, -1, 3);										
+	}
+
+    if (player_2->control->up_right) {																																		
+		movePlayer(player_2, 1, 5);																																		
+		if (collision_2D(player_1, player_2)) movePlayer(player_2, -1, 5);																								
+	}
+	if (player_2->control->up_left) {																																					
+		movePlayer(player_2, 1, 4);																																		
+		if (collision_2D(player_1, player_2)) movePlayer(player_2, -1, 4);																								
+	}
+	if (!player_2->control->left) {														
+		//movePlayer(player_2, 1, 0, X_SCREEN, Y_SCREEN);						
+		if (!collision_2D(player_2, player_1)) movePlayer(player_2, 1, 0);		
+	}
+	
+	if (!player_2->control->right) { 						
+		//movePlayer(player_2, 1, 1, X_SCREEN, Y_SCREEN);		
+		if (!collision_2D(player_2, player_1)) movePlayer(player_2, 1, 1);		
+	}
+	
+	if (player_2->control->up) {									
+		movePlayer(player_2, 1, 2);		
+		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 2);	
+	}
+	if (player_2->control->down) {		
+		movePlayer(player_2, 1, 3);						
+		if (collision_2D(player_2, player_1)) movePlayer(player_2, -1, 3);						
+	}
+
+    updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
+    updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
+}*/
 
 /*void draw_players(ALLEGRO_BITMAP* p1, ALLEGRO_BITMAP* p2, player* player_1, int current, int movement, player* player_2) {
     al_draw_bitmap_region(p1, 112*current, 112*movement, 112, 112, player_1->x, player_1->y, 0);
@@ -173,6 +226,7 @@ int countFrames(int movement) {
         case GET_DOWN:
             return 2;
         default:
+            return -100;
             break;
     }
 }
@@ -189,10 +243,8 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     int frame1 = 0, frame2 = 0;
     int timer_count = 0;
     int maxFrame1 = 5, maxFrame2 = 5;
-    int movement = 0;
     int movement1 = 0, previous_movement1 = 0;
     int movement2 = 0, previous_movement2 = 0;
-    int moved_player = 1;
     background bg;
     init_animated_background(&bg, 24.0, filename);  //supondo que já foi definido em algum lugar
     
@@ -314,7 +366,7 @@ int main() {
     al_register_event_source(queue, al_get_keyboard_event_source());
 
     player* player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
-    player* player_2 = buildPlayer(61, X_SCREEN-100, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
+    player* player_2 = buildPlayer(61, X_SCREEN-122, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
 
     ALLEGRO_FONT *font = al_create_builtin_font();
     if (!font) {

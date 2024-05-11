@@ -1,6 +1,6 @@
 #include "character.h"
 
-player* buildPlayer(unsigned char width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned char height) {						
+player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height) {						
 	if ((x < 0) || (x > max_x) || (y < 0) || (y > max_y)) {
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
@@ -10,8 +10,13 @@ player* buildPlayer(unsigned char width, unsigned short x, unsigned short y, uns
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
     }				
+    new->width = width;
     new->height = height;
-    new->originalHeight = height;								
+    new->originalHeight = height;	
+    new->isJumping = 0;
+    new->isDown = 0;
+    new->speed_x = 0;
+    new->speed_y = 0;							
 	new->x = x;										
 	new->y = y;	
     new->health = 1000;									
@@ -19,7 +24,7 @@ player* buildPlayer(unsigned char width, unsigned short x, unsigned short y, uns
 	return new;						
 }
 
-void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned short bounds) {
+void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {
     element->speed_y += GRAVITY*time;
     
     element->x += element->speed_x;
@@ -31,9 +36,9 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
         element->speed_y = 0;
         element->speed_x = 0;
     }
-   
-    if (element->x+element->width >= bounds) {
-        element->x = bounds-element->width;
+
+    if (element->x+element->width*2 >= bounds) {
+        element->x = bounds-element->width*2;
         element->speed_x = 0;
     } else if (element->x <= 6) {
         element->x = 6;
@@ -50,14 +55,14 @@ void resetPlayer(player *element) {
     element->control->up_right = 0;
 }
 
-void movePlayer(player *element, char steps, unsigned char trajectory, unsigned short max_x, unsigned short max_y) {
+void movePlayer(player *element, char steps, unsigned char trajectory) {
     switch (trajectory) {
         case 0:  // Move left
-            if (/*((element->x - steps * STEP) - element->width >= 0) && */ !element->isJumping) element->x -= steps * STEP;
+            if (!element->isJumping) element->x -= steps * STEP;
             break;
         
         case 1:  // Move right
-            if (/*((element->x + steps * STEP) + element->width <= max_x) && */ !element->isJumping) element->x += steps * STEP;
+            if (!element->isJumping) element->x += steps * STEP;
             break;
 
         case 2:  // Move up 
