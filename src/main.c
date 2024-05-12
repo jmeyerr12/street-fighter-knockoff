@@ -251,8 +251,8 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     //characters new alteration
     ALLEGRO_BITMAP* player1_sheet;
     ALLEGRO_BITMAP* player2_sheet;
-    player1_sheet = al_load_bitmap("../assets/characters/ken.png");
-    player2_sheet = al_load_bitmap("../assets/characters/ken.png");
+    player1_sheet = al_load_bitmap("../assets/characters/bison.png");
+    player2_sheet = al_load_bitmap("../assets/characters/zangief.png");
 
     while (true) {
         ALLEGRO_EVENT event;
