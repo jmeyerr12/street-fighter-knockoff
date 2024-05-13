@@ -216,7 +216,7 @@ int countFrames(int movement) {
         case KICK:
             return 4;
         case PUNCH:
-            return 2;
+            return 3;
         case JUMP_FWD:
             return 8;
             break;
@@ -231,7 +231,7 @@ int countFrames(int movement) {
     }
 }
 
-void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, ALLEGRO_FONT *font) {
+void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet) {
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
@@ -247,12 +247,6 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     int movement2 = 0, previous_movement2 = 0;
     background bg;
     init_animated_background(&bg, 24.0, filename);  //supondo que já foi definido em algum lugar
-    
-    //characters new alteration
-    ALLEGRO_BITMAP* player1_sheet;
-    ALLEGRO_BITMAP* player2_sheet;
-    player1_sheet = al_load_bitmap("../assets/characters/bison.png");
-    player2_sheet = al_load_bitmap("../assets/characters/zangief.png");
 
     while (true) {
         ALLEGRO_EVENT event;
@@ -269,9 +263,6 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
             }
 
             if (event.type == ALLEGRO_EVENT_TIMER) {             
-                //printf("%d", frame);
-                //fflush(stdout);           
-
                 double currentTime = al_get_time();
                 float deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
@@ -392,10 +383,13 @@ int main() {
                 }
                 break;
             case GAME:
+                ALLEGRO_BITMAP* player1_sheet = al_load_bitmap("../assets/characters/ken.png");
+                ALLEGRO_BITMAP* player2_sheet = al_load_bitmap("../assets/characters/ken.png");
                 selected_image = show_image_menu(font, queue);
+                show_characters_menu(font,queue,player1_sheet,player2_sheet);
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
-                run_game(disp, queue, player_1, player_2, &state, filename, font); 
+                run_game(disp, queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet); 
                 break;
         }
         

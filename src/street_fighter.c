@@ -1,5 +1,25 @@
 #include "street_fighter.h"
 
+void draw_characters_menu(ALLEGRO_FONT* font, int selected_option, background* bg) {
+    update_animated_background(bg); // Atualiza a animação do background
+    al_clear_to_color(al_map_rgb(0, 0, 0)); // Limpa a tela
+    draw_animated_background(bg); // Desenha o background animado
+
+    ALLEGRO_COLOR color_unselected = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR color_selected = al_map_rgb(255, 255, 0);
+
+    al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
+                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Destroyed Dojo");
+    al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
+                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Dark Dojo");
+
+    al_flip_display();
+}
+
+void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet) {
+    
+}
+
 void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font) {
     int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
     int norma_size2=((x/2)+((score2*100)/x));

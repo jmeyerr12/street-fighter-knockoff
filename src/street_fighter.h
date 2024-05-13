@@ -38,7 +38,6 @@
 #define MENU_EXIT 1
 
 #define NUM_SPRITES 10
-#define NUM_MOVES 6 //idle,jump,walk,down,jump fwd, jump bck
 
 typedef struct {
     ALLEGRO_BITMAP* frames[NUM_FRAMES];
@@ -54,6 +53,8 @@ typedef struct {
     int right;
 } keyState;
 
+void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet);
+void draw_characters_menu(ALLEGRO_FONT* font, int selected_option, background* bg);
 void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font);
 void draw_menu(ALLEGRO_FONT* font, int selected_option);
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option);
