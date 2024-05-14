@@ -30,6 +30,11 @@
 #define SPRITE_HEIGHT 112
 #define SPRITE_WIDTH 112
 
+#define KEN 0
+#define CHUN_LI 1
+#define BISON 2
+#define ZANGIEF 3
+
 typedef struct {
     unsigned int width, height, originalHeight;
     unsigned int x, y;
@@ -40,6 +45,10 @@ typedef struct {
     int attack;
     bool isDown;
 } player;
+
+typedef struct {
+    unsigned int height, width;
+} size;
 																											
 player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height);	
 void movePlayer(player *element, char steps, unsigned char trajectory);			
