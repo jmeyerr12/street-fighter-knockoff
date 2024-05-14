@@ -383,10 +383,10 @@ int main() {
                 }
                 break;
             case GAME:
-                ALLEGRO_BITMAP* player1_sheet = al_load_bitmap("../assets/characters/ken.png");
-                ALLEGRO_BITMAP* player2_sheet = al_load_bitmap("../assets/characters/ken.png");
+                ALLEGRO_BITMAP* player1_sheet;
+                ALLEGRO_BITMAP* player2_sheet;
+                show_characters_menu(font,queue,&player1_sheet,&player2_sheet);
                 selected_image = show_image_menu(font, queue);
-                show_characters_menu(font,queue,player1_sheet,player2_sheet);
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 run_game(disp, queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet); 
