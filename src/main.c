@@ -32,7 +32,7 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_1->control->up_left) {
         try_move_player(player_1, player_2, 1, 4);
     }
-    // Adicione mais direções aqui conforme necessário
+
     if (player_1->control->left) {
         try_move_player(player_1, player_2, 1, 0);
     }
@@ -52,7 +52,7 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_2->control->up_left) {
         try_move_player(player_2, player_1, 1, 4);
     }
-    // Adicione mais direções aqui conforme necessário
+
     if (player_2->control->left) {
         try_move_player(player_2, player_1, 1, 0);
     }
@@ -246,7 +246,7 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     int movement1 = 0, previous_movement1 = 0;
     int movement2 = 0, previous_movement2 = 0;
     background bg;
-    init_animated_background(&bg, 24.0, filename);  //supondo que já foi definido em algum lugar
+    init_animated_background(&bg, 24.0, filename);  
 
     while (true) {
         ALLEGRO_EVENT event;
