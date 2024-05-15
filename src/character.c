@@ -21,8 +21,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
         attack_start_x = attacker->x - attack_range;
         attack_end_x = attacker->x + attacker->width;
     }
-    printf("%d ", attack_end_x);
-    fflush(stdout);
+   // printf("%d ", attack_end_x);
+  //  fflush(stdout);
 
     // Verifica se a hitbox do ataque e a hurtbox do defensor se sobrepõem
     bool horizontal_overlap = (defender->x < attack_end_x && (defender->x + defender->width) > attack_start_x);
@@ -79,6 +79,19 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
     new->health = 1000;									
 	new->control = joystick_create();									
 	return new;						
+}
+
+void resetAttributes(player **p, unsigned int width, unsigned int height, unsigned short x, unsigned short y) {
+    (*p)->width = width;
+    (*p)->height = height;
+    (*p)->originalHeight = height;	
+    (*p)->isJumping = 0;
+    (*p)->isDown = 0;
+    (*p)->speed_x = 0;
+    (*p)->speed_y = 0;							
+	(*p)->x = x;										
+	(*p)->y = y;	
+    (*p)->health = 1000;		
 }
 
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {

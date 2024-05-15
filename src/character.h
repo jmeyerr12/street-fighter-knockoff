@@ -38,7 +38,7 @@
 typedef struct {
     unsigned int width, height, originalHeight;
     unsigned int x, y;
-    unsigned int health;
+    int health;
     joystick *control;
     float speed_y, speed_x;         
     int isJumping;  
@@ -57,5 +57,6 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
 void resetPlayer(player *element);
 void update_position(player *player_1, player *player_2, float time);
 bool isInRange(player *attacker, player *defender, int attack);
+void resetAttributes(player **p, unsigned int width, unsigned int height, unsigned short x, unsigned short y);
 
 #endif																													
