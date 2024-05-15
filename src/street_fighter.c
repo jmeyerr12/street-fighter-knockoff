@@ -11,7 +11,7 @@ void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected
     al_clear_to_color(al_map_rgb(0, 0, 0));
     ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255); //blue
     ALLEGRO_COLOR red = al_map_rgb(255, 0, 0); //red
-    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255); //white
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255); //whiterc
 
     int start_x = (X_SCREEN - (2 * 32 + 10)) / 2; 
     int start_y = (Y_SCREEN - (2 * 32 + 10)) / 2 - 50; 

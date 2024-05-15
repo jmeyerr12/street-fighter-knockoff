@@ -245,6 +245,7 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
     int maxFrame1 = 5, maxFrame2 = 5;
     int movement1 = 0, previous_movement1 = 0;
     int movement2 = 0, previous_movement2 = 0;
+    int alreadyDamaged1 = 0, alreadyDamaged2 = 0;
     background bg;
     init_animated_background(&bg, 24.0, filename);  
 
@@ -279,9 +280,9 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
                 handle_input(&key_state, player_1, player_2, &movement1, &movement2);
                 
                 if (movement1 == GET_DOWN) {
-                    if ((frame1 < maxFrame1) && timer_count % 20 == 0) frame1++;  
+                    if ((frame1 < maxFrame1) && timer_count % 10 == 0) frame1++;  
                 } else {     
-                    if (timer_count % 20 == 0) frame1++;
+                    if (timer_count % 10 == 0) frame1++;
                     if (player_1->attack != 0 && frame1 >= maxFrame1) player_1->attack = 0;
                     if (frame1 > maxFrame1) frame1 = 0;
                 }
@@ -292,16 +293,27 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
                 else if (player_1->isJumping == 2) movement1 = JUMP_BCK;
                 else if (player_1->isJumping == 3) movement1 = JUMP_FWD;
 
-                if (player_1->attack == ATTACK_KICK) movement1 = KICK;
-                else if (player_1->attack == ATTACK_PUNCH) movement1 = PUNCH;
+                if (player_1->attack == ATTACK_KICK) {
+                    movement1 = KICK;
+                    if (isInRange(player_1, player_2, KICK) && !alreadyDamaged1) {
+                        alreadyDamaged1 = 1;
+                        player_2->health -= 30; //implementar sprite de sofrendo ataque!!
+                    }
+                } else if (player_1->attack == ATTACK_PUNCH) {
+                    movement1 = PUNCH;
+                    if (isInRange(player_1, player_2, PUNCH) && !alreadyDamaged1) {
+                        alreadyDamaged1 = 1;
+                        player_2->health -= 30; //implementar sprite de sofrendo ataque!!
+                    }
+                } else alreadyDamaged1 = 0;
 
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
 
                 if (movement2 == GET_DOWN) {
-                    if ((frame2 < maxFrame2) && timer_count % 20 == 0) frame2++;  
+                    if ((frame2 < maxFrame2) && timer_count % 10 == 0) frame2++;  
                 } else {     
-                    if (timer_count % 20 == 0) frame2++;
+                    if (timer_count % 10 == 0) frame2++;
                     if (player_2->attack != 0 && frame2 >= maxFrame2) player_2->attack = 0;
                     if (frame2 > maxFrame2) frame2 = 0;
                 }
@@ -312,8 +324,20 @@ void run_game(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
                 else if (player_2->isJumping == 2) movement2 = JUMP_BCK;
                 else if (player_2->isJumping == 3) movement2 = JUMP_FWD;
 
-                if (player_2->attack == ATTACK_KICK) movement2 = KICK;
-                else if (player_2->attack == ATTACK_PUNCH) movement2 = PUNCH;
+                if (player_2->attack == ATTACK_KICK) {
+                    movement2 = KICK;
+                    if (isInRange(player_2, player_1, KICK) && !alreadyDamaged2) {
+                        alreadyDamaged2 = 1;
+                        player_1->health -= 30; //implementar sprite de sofrendo ataque!!
+                    }
+                } else if (player_2->attack == ATTACK_PUNCH) {
+                    movement2 = PUNCH;
+                    if (isInRange(player_2, player_1, PUNCH) && !alreadyDamaged2) {
+                        alreadyDamaged2 = 1;
+                        player_1->health -= 30; //implementar sprite de sofrendo ataque!!
+                    }
+                } else alreadyDamaged2 = 0;
+
 
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);

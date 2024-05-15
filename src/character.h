@@ -15,8 +15,8 @@
 #define ATTACK_KICK 2
 
 #define STEP 2	
-#define GRAVITY 110
-#define INITIAL_JUMP_SPEED -130.0	
+#define GRAVITY 300
+#define INITIAL_JUMP_SPEED -240.0	
 
 #define IDLE 0
 #define WALK 1
@@ -56,5 +56,6 @@ void destroyPlayer(player *element);
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds);																	
 void resetPlayer(player *element);
 void update_position(player *player_1, player *player_2, float time);
+bool isInRange(player *attacker, player *defender, int attack);
 
 #endif																													

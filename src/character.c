@@ -1,5 +1,34 @@
 #include "character.h"
 
+bool isInRange(player *attacker, player *defender, int attack) {
+    int attack_range;
+
+    switch (attack) {
+        case PUNCH:
+            attack_range = 20;  // Alcance de um soco
+            break;
+        case KICK:
+            attack_range = 30;  // Alcance de um chute
+            break;
+    }
+
+    int attack_start_x = attacker->x;
+    int attack_end_x;
+
+    if (attacker->x < defender->x) {
+        attack_end_x = attack_start_x + attacker->width + attack_range;
+    } else {
+        attack_start_x = attacker->x - attack_range;
+        attack_end_x = attacker->x + attacker->width;
+    }
+
+    // Verifica se a hitbox do ataque e a hurtbox do defensor se sobrepõem
+    bool horizontal_overlap = (defender->x < attack_end_x && (defender->x + defender->width) > attack_start_x);
+    bool vertical_overlap = (defender->y - defender->height <= attacker->y && defender->y >= attacker->y - attacker->height);
+
+    return horizontal_overlap && vertical_overlap;
+}
+
 size** characterSizes() {
     size initSizes[4][8] = {
         //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK
