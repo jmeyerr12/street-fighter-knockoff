@@ -5,10 +5,10 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
     switch (attack) {
         case PUNCH:
-            attack_range = 20;  // Alcance de um soco
+            attack_range = 10;  // Alcance de um soco
             break;
         case KICK:
-            attack_range = 30;  // Alcance de um chute
+            attack_range = 10;  // Alcance de um chute
             break;
     }
 
@@ -21,6 +21,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
         attack_start_x = attacker->x - attack_range;
         attack_end_x = attacker->x + attacker->width;
     }
+    printf("%d ", attack_end_x);
+    fflush(stdout);
 
     // Verifica se a hitbox do ataque e a hurtbox do defensor se sobrepõem
     bool horizontal_overlap = (defender->x < attack_end_x && (defender->x + defender->width) > attack_start_x);

@@ -55,7 +55,7 @@ typedef struct {
 
 void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads, int done1, int done2);
 void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet);
-void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font);
+void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font, int countdown);
 void draw_menu(ALLEGRO_FONT* font, int selected_option);
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option);
 int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue);

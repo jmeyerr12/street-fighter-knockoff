@@ -11,7 +11,7 @@ void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected
     al_clear_to_color(al_map_rgb(0, 0, 0));
     ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255); //blue
     ALLEGRO_COLOR red = al_map_rgb(255, 0, 0); //red
-    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255); //whiterc
+    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255); //white
 
     int start_x = (X_SCREEN - (2 * 32 + 10)) / 2; 
     int start_y = (Y_SCREEN - (2 * 32 + 10)) / 2 - 50; 
@@ -27,7 +27,7 @@ void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected
         al_draw_bitmap_region(heads, 0, 32 + selected_option2 * 16, 96, 16, 
                         (X_SCREEN*3)/5, Y_SCREEN/2, 0);
         al_draw_bitmap_region(heads, selected_option2*112, 96, 112, 112, 
-                        (X_SCREEN*3)/5, Y_SCREEN-115, 0);
+                        (X_SCREEN*1)/2, Y_SCREEN-115, ALLEGRO_FLIP_HORIZONTAL);
     }
 
     draw_character_selection(heads, 0, start_x, start_y, sprite_dimensions, selected_option1==0? blue : (selected_option2==0? red : white));
@@ -114,7 +114,7 @@ void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGR
     al_destroy_timer(timer);   
 }
 
-void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font) {
+void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font, int countdown) {
     int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
     int norma_size2=((x/2)+((score2*100)/x));
     
@@ -129,6 +129,13 @@ void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font) {
                              x/2, 20, al_map_rgb(255, 0, 0));
     al_draw_filled_rectangle(norma_size2, 5,
                              x/2, 20, al_map_rgb(0, 0, 255));
+
+    char mid_text[100];
+    sprintf(mid_text, "%d", countdown);
+
+    int mid_text_x = x / 2 - al_get_text_width(font, mid_text) / 2;
+    int mid_text_y = 25; 
+    al_draw_text(font, al_map_rgb(255, 255, 0), mid_text_x, mid_text_y, 0, mid_text);
 }
 
 void init_animated_background(background* bg, float frame_rate, char *folder) {
