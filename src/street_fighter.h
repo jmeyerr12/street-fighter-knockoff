@@ -33,6 +33,7 @@
 #define MENU 0
 #define GAME 1
 #define EXIT 2
+#define ENDGAME 3
 
 #define MENU_START 0
 #define MENU_EXIT 1

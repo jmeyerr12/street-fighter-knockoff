@@ -41,9 +41,9 @@ typedef struct {
     int health;
     joystick *control;
     float speed_y, speed_x;         
-    int isJumping;  
+    int isJumping, isDown;  //implementar no codigo mudanca de altura, nao esta feita (isDown)
     int attack;
-    bool isDown;
+    unsigned int estamina; //implementar (parece simples)
 } player;
 
 typedef struct {

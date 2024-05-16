@@ -3,12 +3,6 @@
 #include "street_fighter.h"		
 
 unsigned char collision_2D(player *element_first, player *element_second) {
-    //printf("  --  %d  %d  --  ",element_first->x + element_first->width > element_second->x,(element_first->x < element_second->x + element_second->width));
-    //printf("  --  %d  %d  --  ",element_first->x, element_second->x);
-    //printf("  --  %d  %d  --  ",element_first->x , element_second->x); //+ element_second->width);
-    
-    //fflush(stdout);
-
     int overlap_x = (element_first->x+6 > element_second->x) &&  //6 é um threshold
                     (element_first->x < element_second->x+6);
 
@@ -97,10 +91,10 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
     } else if (al_key_down(key_state, ALLEGRO_KEY_D)) {
         joystick_right(player_1->control);
         *movement1 = WALK;
-    } else if (al_key_down(key_state, ALLEGRO_KEY_R)) {
+    } else if (al_key_down(key_state, ALLEGRO_KEY_R) && player_1->attack == 0) {
         player_1->attack = ATTACK_PUNCH;
         *movement1 = PUNCH;
-    } else if (al_key_down(key_state, ALLEGRO_KEY_F)) {
+    } else if (al_key_down(key_state, ALLEGRO_KEY_F) && player_1->attack == 0) {
         player_1->attack = ATTACK_KICK;
         *movement1 = KICK;
     } else {
@@ -127,10 +121,10 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
     } else if (al_key_down(key_state, ALLEGRO_KEY_RIGHT)) {
         joystick_right(player_2->control);
         *movement2 = WALK;
-    } else if (al_key_down(key_state, ALLEGRO_KEY_P)) {
+    } else if (al_key_down(key_state, ALLEGRO_KEY_P) && player_2->attack == 0) {
         player_2->attack = ATTACK_PUNCH;
         *movement2 = PUNCH;
-    } else if (al_key_down(key_state, ALLEGRO_KEY_L)) {
+    } else if (al_key_down(key_state, ALLEGRO_KEY_L) && player_2->attack == 0) {
         player_2->attack = ATTACK_KICK;
         *movement2 = KICK;
     } else {
@@ -409,7 +403,7 @@ int main() {
                 selected_image = show_image_menu(font, queue);
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
-                while ((p1Wins <= 2) && (p2Wins <= 2) && (roundCounter <= 3)) { 
+                while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) { 
                     int resultado = run_round(disp, queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
                     if (resultado == 0) { //em caso de empate o vencedor é sorteado
                         resultado = 1 + rand() % 2;
@@ -421,7 +415,11 @@ int main() {
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
                 }
-                //fazer função para mostrar tela final (implementar novo estado?)
+                state = ENDGAME;
+                break;
+            case ENDGAME:
+                //mostrar endgame com vencedor e estatisticas
+                state = MENU;
                 break;
         }
         
