@@ -183,8 +183,19 @@ void showWinner(ALLEGRO_FONT *font, int winner) {
     al_rest(1);
 }
 
+
+void updateDimensions(player *p, size** charSizes, int movement) {
+    p->height = charSizes[p->sprite][movement].height;
+}
+
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
-int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
+int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
+              ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
+
+    size** charSizes = characterSizes();
+    setDimensions(player_1, charSizes[player_1->sprite][IDLE].width, charSizes[player_1->sprite][IDLE].height);
+    setDimensions(player_2, charSizes[player_2->sprite][IDLE].width, charSizes[player_2->sprite][IDLE].height);
+    
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
@@ -342,14 +353,25 @@ int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
 
                 resetPlayer(player_1);
                 resetPlayer(player_2);
+
+                updateDimensions(player_1, charSizes, movement1);
+                updateDimensions(player_2, charSizes, movement2);
+
                 previous_movement1 = movement1;
                 previous_movement2 = movement2;
+
+                if (timer_count_without_pause % 120 == 0) {
+                    printf("\n\n -- %d -- ", timer_count_without_pause/30);
+                    printPlayerStatistics(player_1, 1);
+                    printPlayerStatistics(player_2, 2);
+                }
             }
         } 
     }
     
     al_destroy_timer(timer);
     destroy_animated_background(&bg);
+    freeCharacterSizes(charSizes);
     return isFim;
 }
 
@@ -381,6 +403,7 @@ int main() {
     int p1Wins = 0;
     int p2Wins = 0;
     int roundCounter = 1;
+    int sel1 = 0,sel2 = 1;
 
     srand(time(NULL));
     
@@ -399,7 +422,9 @@ int main() {
             case GAME:
                 ALLEGRO_BITMAP* player1_sheet;
                 ALLEGRO_BITMAP* player2_sheet;
-                show_characters_menu(font,queue,&player1_sheet,&player2_sheet);
+                show_characters_menu(font,queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
+                player_1->sprite = sel1;
+                player_2->sprite = sel2;
                 selected_image = show_image_menu(font, queue);
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");

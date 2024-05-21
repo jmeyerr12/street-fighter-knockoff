@@ -31,11 +31,11 @@ bool isInRange(player *attacker, player *defender, int attack) {
     return horizontal_overlap && vertical_overlap;
 }
 
-size** characterSizes() {
+size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
     size initSizes[4][8] = {
         //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK
-        {{59, 90}, {62, 95}, {88, 55}, {90, 58}, {89, 57}, {91, 56}, {90, 56}, {92, 57}},   // ken
-        {{85, 50}, {83, 52}, {86, 53}, {85, 54}, {84, 51}, {85, 52}, {86, 50}, {84, 52}},   // chun li
+        {{59, 90}, {64, 90}, {64, 91}, {60, 94}, {61, 61}, {48, 70}, {53, 82}, {53, 82}},   // ken  -- DONE
+        {{60, 85}, {76, 87}, {56, 87}, {69, 97}, {72, 66}, {57, 65}, {55, 112}, {55, 112}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
         {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}},   // bison 
         {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}} // zangief
     };
@@ -55,6 +55,11 @@ void freeCharacterSizes(size** charSizes) {
         free(charSizes[i]);
     }
     free(charSizes); 
+}
+
+void setDimensions(player *p, unsigned int width, unsigned int height) {
+    p->width = width;
+    p->height = height;
 }
 
 player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height) {						
@@ -94,6 +99,20 @@ void resetAttributes(player **p, unsigned int width, unsigned int height, unsign
     (*p)->health = 1000;		
 }
 
+//p->x, py, p->x+p->width, py, p->x, py+p->height, p->x+p->width, py+p->height,
+void setHitbox(player *p) {
+    int py = p->y+SPRITE_HEIGHT;
+
+    p->SW.x = p->x;
+    p->SW.y = py;
+    p->SE.x = p->x+p->width;
+    p->SE.y = py;
+    p->NW.x = p->x;
+    p->NW.y = py+p->height;
+    p->NE.x = p->x+p->width;
+    p->NE.y = py+p->height;
+}
+
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {
     element->speed_y += GRAVITY*time;
     
@@ -114,6 +133,8 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
         element->x = 6;
         element->speed_x = 0;
     }
+
+    setHitbox(element);
 }
 																
 void resetPlayer(player *element) {
@@ -168,3 +189,14 @@ void destroyPlayer(player *element){
 	joystick_destroy(element->control);							
 	free(element);						
 }
+
+void printPlayerStatistics(player *p, int i) {
+    printf("\n\n -- player %d -- \nisJumping: %d\nattack: %s\nheight: %d\nwidth: %d\nx: %d y: %d\nSW: (%d,%d) | SE: (%d,%d)\nNW: (%d,%d) | NE: (%d,%d)\npunching range: (%d, %d)\nkicking range: (%d, %d)", i, p->isJumping, 
+            !p->attack ? "NOT ATTACKING" : (p->attack == KICK ? "KICKING" : (p->attack == PUNCH ? "PUNCHING" : "ERROR")),
+            p->height, p->width,
+            p->x, p->y, 
+            p->SW.x, p->SW.y, p->SE.x, p->SE.y, p->NW.x, p->NW.y, p->NE.x, p->NE.y,
+            0,0,0,0
+            );
+    fflush(stdout);
+} 
