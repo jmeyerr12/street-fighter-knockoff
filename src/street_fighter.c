@@ -7,7 +7,7 @@ void draw_character_selection(ALLEGRO_BITMAP* sprite_sheet, int sprite_index, in
                           x, y, 0);
 }
 
-void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads, int done1, int done2) { 
+void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads) { 
     al_clear_to_color(al_map_rgb(0, 0, 0));
     ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255); //blue
     ALLEGRO_COLOR red = al_map_rgb(255, 0, 0); //red
@@ -35,21 +35,21 @@ void draw_characters_menu(ALLEGRO_FONT* font, int selected_option1, int selected
     al_flip_display();
 }
 
-void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2) {
+void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2) {
     *selected_option1 = 0;
     *selected_option2 = 1;
 
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
-    ALLEGRO_BITMAP* heads = al_load_bitmap("../assets/characters/heads.png");
+    ALLEGRO_BITMAP* heads = al_load_bitmap("./assets/characters/heads.png");
 
     bool done1, done2 = false;
 
     while (!(done1 && done2)) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
-        draw_characters_menu(font, *selected_option1, *selected_option2, heads, done1, done2);  
+        draw_characters_menu(*selected_option1, *selected_option2, heads);  
         al_clear_to_color(al_map_rgb(0, 0, 0));
         
         if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
@@ -112,24 +112,24 @@ void show_characters_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, ALLEGR
         }
     }
 
-    if (*selected_option1 == 0) *player1_sheet = al_load_bitmap("../assets/characters/chun_li.png");
-    else if (*selected_option1 == 1) *player1_sheet = al_load_bitmap("../assets/characters/ken.png");
-    else if (*selected_option1 == 2) *player1_sheet = al_load_bitmap("../assets/characters/zangief.png");
-    else if (*selected_option1 == 3) *player1_sheet = al_load_bitmap("../assets/characters/bison.png");
+    if (*selected_option1 == 0) *player1_sheet = al_load_bitmap("./assets/characters/chun_li.png");
+    else if (*selected_option1 == 1) *player1_sheet = al_load_bitmap("./assets/characters/ken.png");
+    else if (*selected_option1 == 2) *player1_sheet = al_load_bitmap("./assets/characters/zangief.png");
+    else if (*selected_option1 == 3) *player1_sheet = al_load_bitmap("./assets/characters/bison.png");
 
-    if (*selected_option2 == 0) *player2_sheet = al_load_bitmap("../assets/characters/chun_li.png");
-    else if (*selected_option2 == 1) *player2_sheet = al_load_bitmap("../assets/characters/ken.png");
-    else if (*selected_option2 == 2) *player2_sheet = al_load_bitmap("../assets/characters/zangief.png");
-    else if (*selected_option2 == 3) *player2_sheet = al_load_bitmap("../assets/characters/bison.png");
+    if (*selected_option2 == 0) *player2_sheet = al_load_bitmap("./assets/characters/chun_li.png");
+    else if (*selected_option2 == 1) *player2_sheet = al_load_bitmap("./assets/characters/ken.png");
+    else if (*selected_option2 == 2) *player2_sheet = al_load_bitmap("./assets/characters/zangief.png");
+    else if (*selected_option2 == 3) *player2_sheet = al_load_bitmap("./assets/characters/bison.png");
 
-    draw_characters_menu(font, *selected_option1, *selected_option2, heads, done1, done2);  
+    draw_characters_menu(*selected_option1, *selected_option2, heads);  
     al_rest(1.5); 
 
     al_destroy_bitmap(heads); 
     al_destroy_timer(timer);   
 }
 
-void draw_scoreboard(int score1, int score2, int x, int y, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2) {
+void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2) {
     int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
     int norma_size2=((x/2)+((score2*100)/x));
 
@@ -168,7 +168,7 @@ void init_animated_background(background* bg, float frame_rate, char *folder) {
     bg->last_frame_update_time = 0;
     for (int i = 0; i < NUM_FRAMES; i++) {
         char filename[500];
-        snprintf(filename, sizeof(filename), "../assets/background/%s/019-l6Xgvsw-%d.png", folder, i);
+        snprintf(filename, sizeof(filename), "./assets/background/%s/019-l6Xgvsw-%d.png", folder, i);
         bg->frames[i] = al_load_bitmap(filename);
         if (!bg->frames[i]) {
             fprintf(stderr, "Failed to load frame %d. - IMAGE %s\n", i, filename);

@@ -189,7 +189,7 @@ void updateDimensions(player *p, size** charSizes, int movement) {
 }
 
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
-int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
+int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
               ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
 
     size** charSizes = characterSizes();
@@ -223,7 +223,7 @@ int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
         draw_player(player1_sheet, player_1, frame1, movement1, 0);
         draw_player(player2_sheet, player_2, frame2, movement2, 1);
     }
-    draw_scoreboard(player_1->health,player_2->health,X_SCREEN,Y_SCREEN,font,countdown,round,p1Wins,p2Wins);   
+    draw_scoreboard(player_1->health,player_2->health,X_SCREEN,font,countdown,round,p1Wins,p2Wins);   
 
     char roundText[100];
     if (round == 1) strcpy(roundText, "1ST ROUND");
@@ -345,7 +345,7 @@ int run_round(ALLEGRO_DISPLAY* disp, ALLEGRO_EVENT_QUEUE* queue, player* player_
                     draw_player(player2_sheet, player_2, frame2, movement2, 1);
                 }
 
-                draw_scoreboard(player_1->health,player_2->health,X_SCREEN,Y_SCREEN,font,countdown,round,p1Wins,p2Wins);    
+                draw_scoreboard(player_1->health,player_2->health,X_SCREEN,font,countdown,round,p1Wins,p2Wins);    
 
                 if (timer_count_without_pause % 30 == 0) countdown--;                                   
 
@@ -422,14 +422,14 @@ int main() {
             case GAME:
                 ALLEGRO_BITMAP* player1_sheet;
                 ALLEGRO_BITMAP* player2_sheet;
-                show_characters_menu(font,queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
+                show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
                 selected_image = show_image_menu(font, queue);
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) { 
-                    int resultado = run_round(disp, queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
+                    int resultado = run_round(queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
                     if (resultado == 0) { //em caso de empate o vencedor é sorteado
                         resultado = 1 + rand() % 2;
                     }

@@ -12,8 +12,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
             break;
     }
 
-    int attack_start_x = attacker->x;
-    int attack_end_x;
+    unsigned int attack_start_x = attacker->x;
+    unsigned int attack_end_x;
 
     if (attacker->x < defender->x) {
         attack_end_x = attack_start_x + attacker->width + attack_range;
@@ -63,7 +63,7 @@ void setDimensions(player *p, unsigned int width, unsigned int height) {
 }
 
 player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height) {						
-	if ((x < 0) || (x > max_x) || (y < 0) || (y > max_y)) {
+	if ((x > max_x) || (y > max_y)) {
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
     }			
