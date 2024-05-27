@@ -13,6 +13,10 @@
 
 #define ATTACK_PUNCH 1
 #define ATTACK_KICK 2
+#define ATTACK_JUMPING_KICK 3
+#define ATTACK_DOWN_PUNCH 4
+#define ATTACK_JUMPING_PUNCH 5
+#define ATTACK_DOWN_KICK 6
 
 #define STEP 2	
 #define GRAVITY 300
@@ -26,6 +30,10 @@
 #define JUMP 5
 #define JUMP_FWD 6
 #define JUMP_BCK 7
+#define DOWN_PUNCH 8
+#define JUMPING_KICK 9
+#define JUMPING_PUNCH 10
+#define DOWN_KICK 11
 
 #define SPRITE_HEIGHT 112
 #define SPRITE_WIDTH 112

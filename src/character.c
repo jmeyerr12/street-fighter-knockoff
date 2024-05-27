@@ -32,12 +32,12 @@ bool isInRange(player *attacker, player *defender, int attack) {
 }
 
 size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
-    size initSizes[4][8] = {
-        //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK
-        {{59, 90}, {64, 90}, {64, 91}, {60, 94}, {61, 61}, {48, 70}, {53, 82}, {53, 82}},   // ken  -- DONE
-        {{60, 85}, {76, 87}, {56, 87}, {69, 97}, {72, 66}, {57, 65}, {55, 112}, {55, 112}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
-        {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}},   // bison 
-        {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}} // zangief
+    size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
+        //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
+        {{59, 90}, {64, 90}, {64, 91}, {60, 94}, {61, 61}, {48, 70}, {53, 82}, {53, 82}, {48,70}, {61,61}, {48,70}, {61,61}},   // ken  -- DONE
+        {{60, 85}, {76, 87}, {56, 87}, {69, 97}, {72, 66}, {57, 65}, {55, 112}, {55, 112}, {48,70}, {61,61}, {48,70}, {61,61}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
+        {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}},   // bison 
+        {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}} // zangief
     };
 
     size** charSizes = malloc(4 * sizeof(size*)); 
@@ -72,6 +72,7 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
     }				
+    new->attack = 0;
     new->width = width;
     new->height = height;
     new->originalHeight = height;	
@@ -191,8 +192,9 @@ void destroyPlayer(player *element){
 }
 
 void printPlayerStatistics(player *p, int i) {
-    printf("\n\n -- player %d -- \nisJumping: %d\nattack: %s\nheight: %d\nwidth: %d\nx: %d y: %d\nSW: (%d,%d) | SE: (%d,%d)\nNW: (%d,%d) | NE: (%d,%d)\npunching range: (%d, %d)\nkicking range: (%d, %d)", i, p->isJumping, 
-            !p->attack ? "NOT ATTACKING" : (p->attack == KICK ? "KICKING" : (p->attack == PUNCH ? "PUNCHING" : "ERROR")),
+    printf("\n\n -- player %d -- \nisJumping: %d\nisDown: %d\nattack: %s\nheight: %d\nwidth: %d\nx: %d y: %d\nSW: (%d,%d) | SE: (%d,%d)\nNW: (%d,%d) | NE: (%d,%d)\npunching range: (%d, %d)\nkicking range: (%d, %d)", 
+            i, p->isJumping, p->isDown,
+            !p->attack ? "NOT ATTACKING" : (p->attack == KICK ? "KICKING" : (p->attack == PUNCH ? "PUNCHING" : "ATTACK JUMPING OR DOWN")),
             p->height, p->width,
             p->x, p->y, 
             p->SW.x, p->SW.y, p->SE.x, p->SE.y, p->NW.x, p->NW.y, p->NE.x, p->NE.y,
