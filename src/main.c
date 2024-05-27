@@ -435,6 +435,7 @@ int main() {
                     }
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
+                    else break; //clicou para sair
                     showWinner(font, resultado);
                     resetAttributes(&player_1, 61, 92, 10, Y_SCREEN/2);
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
