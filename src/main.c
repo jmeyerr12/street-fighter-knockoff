@@ -188,6 +188,40 @@ void updateDimensions(player *p, size** charSizes, int movement) {
     p->height = charSizes[p->sprite][movement].height;
 }
 
+void handle_down(player *p, int mv, int *frame, int maxFrames, int timer_count) {
+    if (mv == GET_DOWN) {
+        if (((*frame) < maxFrames) && timer_count % 10 == 0) (*frame)++;  
+    } else {     
+        if (timer_count % 10 == 0) (*frame)++;  
+        if (p->attack != 0 && (*frame) >= maxFrames) p->attack = 0;
+        if ((*frame) > maxFrames) (*frame) = 0;
+    }
+}
+
+void handle_jump(player *p, player *opponent, int *movement) {
+    if (p->isJumping == 1) (*movement) = JUMP;
+    else if (p->isJumping == 2 && (p->x > opponent->x)) (*movement) = JUMP_FWD;
+    else if (p->isJumping == 3 && (p->x > opponent->x)) (*movement) = JUMP_BCK;
+    else if (p->isJumping == 2) (*movement) = JUMP_BCK;
+    else if (p->isJumping == 3) (*movement) = JUMP_FWD;
+}
+
+void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamaged) {
+    if (p->attack == ATTACK_KICK) {
+        *movement = KICK;
+        if (isInRange(p, opponent, KICK) && !(*alreadyDamaged)) {
+            (*alreadyDamaged) = 1;
+            opponent->health -= 30; //implementar sprite de sofrendo ataque!!
+        }
+    } else if (p->attack == ATTACK_PUNCH) {
+        *movement = PUNCH;
+        if (isInRange(p, opponent, PUNCH) && !(*alreadyDamaged)) {
+            (*alreadyDamaged) = 1;
+            opponent->health -= 30; //implementar sprite de sofrendo ataque!!
+        }
+    } else (*alreadyDamaged) = 0;
+}
+
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
 int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
               ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
@@ -203,7 +237,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     double lastTime = al_get_time();
     int running = 1;
     int frame1 = 0, frame2 = 0;
-    int timer_count = 0, timer_count_without_pause = 0;
+    int timer_count = 0;
     int maxFrame1 = 5, maxFrame2 = 5;
     int movement1 = 0, previous_movement1 = 0;
     int movement2 = 0, previous_movement2 = 0;
@@ -241,10 +275,16 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     while (true) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
+
+                ALLEGRO_KEYBOARD_STATE key_state;
+                al_get_keyboard_state(&key_state);
         
         if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
             running = !running;
-        } 
+            if (running) {
+                lastTime = al_get_time(); // Reset the timer when resuming
+            }
+        }
 
         if (running) {
             if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
@@ -255,7 +295,9 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
             isFim = verificaFim(player_1, player_2, countdown);
             if (isFim != 3) break;
 
-            if (event.type == ALLEGRO_EVENT_TIMER) {             
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                timer_count++;
+
                 double currentTime = al_get_time();
                 float deltaTime = currentTime - lastTime;
                 lastTime = currentTime;
@@ -264,80 +306,25 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 al_clear_to_color(al_map_rgb(0, 0, 0));
                 draw_animated_background(&bg);
 
-                ALLEGRO_KEYBOARD_STATE key_state;
-                al_get_keyboard_state(&key_state);
-
-                timer_count++;
-                if (running) timer_count_without_pause++; 
-
                 handle_input(&key_state, player_1, player_2, &movement1, &movement2);
                 
-                if (movement1 == GET_DOWN) {
-                    if ((frame1 < maxFrame1) && timer_count % 10 == 0) frame1++;  
-                } else {     
-                    if (timer_count % 10 == 0) frame1++;
-                    if (player_1->attack != 0 && frame1 >= maxFrame1) player_1->attack = 0;
-                    if (frame1 > maxFrame1) frame1 = 0;
-                }
-
-                if (player_1->isJumping == 1) movement1 = JUMP;
-                else if (player_1->isJumping == 2 && (player_1->x > player_2->x)) movement1 = JUMP_FWD;
-                else if (player_1->isJumping == 3 && (player_1->x > player_2->x)) movement1 = JUMP_BCK;
-                else if (player_1->isJumping == 2) movement1 = JUMP_BCK;
-                else if (player_1->isJumping == 3) movement1 = JUMP_FWD;
-
-                if (player_1->attack == ATTACK_KICK) {
-                    movement1 = KICK;
-                    if (isInRange(player_1, player_2, KICK) && !alreadyDamaged1) {
-                        alreadyDamaged1 = 1;
-                        player_2->health -= 30; //implementar sprite de sofrendo ataque!!
-                    }
-                } else if (player_1->attack == ATTACK_PUNCH) {
-                    movement1 = PUNCH;
-                    if (isInRange(player_1, player_2, PUNCH) && !alreadyDamaged1) {
-                        alreadyDamaged1 = 1;
-                        player_2->health -= 30; //implementar sprite de sofrendo ataque!!
-                    }
-                } else alreadyDamaged1 = 0;
-
+                handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
+                handle_jump(player_1, player_2, &movement1);
+                handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
+                previous_movement1 = movement1;
 
-                if (movement2 == GET_DOWN) {
-                    if ((frame2 < maxFrame2) && timer_count % 10 == 0) frame2++;  
-                } else {     
-                    if (timer_count % 10 == 0) frame2++;
-                    if (player_2->attack != 0 && frame2 >= maxFrame2) player_2->attack = 0;
-                    if (frame2 > maxFrame2) frame2 = 0;
-                }
-
-                if (player_2->isJumping == 1) movement2 = JUMP;
-                else if (player_2->isJumping == 2 && (player_2->x > player_1->x)) movement2 = JUMP_FWD;
-                else if (player_2->isJumping == 3 && (player_2->x > player_1->x)) movement2 = JUMP_BCK;
-                else if (player_2->isJumping == 2) movement2 = JUMP_BCK;
-                else if (player_2->isJumping == 3) movement2 = JUMP_FWD;
-
-                if (player_2->attack == ATTACK_KICK) {
-                    movement2 = KICK;
-                    if (isInRange(player_2, player_1, KICK) && !alreadyDamaged2) {
-                        alreadyDamaged2 = 1;
-                        player_1->health -= 30; //implementar sprite de sofrendo ataque!!
-                    }
-                } else if (player_2->attack == ATTACK_PUNCH) {
-                    movement2 = PUNCH;
-                    if (isInRange(player_2, player_1, PUNCH) && !alreadyDamaged2) {
-                        alreadyDamaged2 = 1;
-                        player_1->health -= 30; //implementar sprite de sofrendo ataque!!
-                    }
-                } else alreadyDamaged2 = 0;
-
-
+                handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
+                handle_jump(player_2, player_1, &movement2);
+                handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
+                previous_movement2 = movement2;
 
-                update_position(player_1, player_2, deltaTime); 
+                update_position(player_1, player_2, deltaTime);
 
-                if (player_1->x > player_2->x){
+                if (player_1->x > player_2->x) {
                     draw_player(player1_sheet, player_1, frame1, movement1, 1);
                     draw_player(player2_sheet, player_2, frame2, movement2, 0);
                 } else {
@@ -345,9 +332,9 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                     draw_player(player2_sheet, player_2, frame2, movement2, 1);
                 }
 
-                draw_scoreboard(player_1->health,player_2->health,X_SCREEN,font,countdown,round,p1Wins,p2Wins);    
+                draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins);
 
-                if (timer_count_without_pause % 30 == 0) countdown--;                                   
+                if (timer_count % 30 == 0) countdown--;
 
                 al_flip_display();
 
@@ -356,18 +343,16 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
                 updateDimensions(player_1, charSizes, movement1);
                 updateDimensions(player_2, charSizes, movement2);
-
-                previous_movement1 = movement1;
-                previous_movement2 = movement2;
-
-                if (timer_count_without_pause % 120 == 0) {
-                    printf("\n\n -- %d -- ", timer_count_without_pause/30);
-                    printPlayerStatistics(player_1, 1);
-                    printPlayerStatistics(player_2, 2);
-                }
             }
-        } 
+        }
+        if (timer_count % 120 == 0) {
+            printf("\n\n -- %d -- ", timer_count / 30);
+            printf("\n---------- %f", al_get_time());
+            printPlayerStatistics(player_1, 1);
+            printPlayerStatistics(player_2, 2);
+        }
     }
+
     
     al_destroy_timer(timer);
     destroy_animated_background(&bg);

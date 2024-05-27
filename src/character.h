@@ -49,6 +49,7 @@ typedef struct {
     float speed_y, speed_x;         
     int isJumping, isDown;  //implementar no codigo mudanca de altura, nao esta feita (isDown)
     int attack;
+    int previous_movement;
     unsigned int estamina; //implementar (parece simples)
 } player;
 
