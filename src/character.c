@@ -5,37 +5,57 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
     switch (attack) {
         case PUNCH:
-            attack_range = 10;  // Alcance de um soco
+            attack_range = 30;  
             break;
         case KICK:
-            attack_range = 10;  // Alcance de um chute
+            attack_range = 10;  
             break;
+        case JUMPING_KICK:
+            attack_range = 10;  
+            break;
+        case JUMPING_PUNCH:
+            attack_range = 10;  
+            break;
+        case DOWN_KICK:
+            attack_range = 10;  
+            break;
+        case DOWN_PUNCH:
+            attack_range = 10;  
+            break;
+        default:
+            return false;  
     }
 
-    unsigned int attack_start_x = attacker->x;
-    unsigned int attack_end_x;
+    int attacker_left = attacker->NW.x;
+    int attacker_right = attacker->SE.x;
+    int attacker_top = attacker->NW.y;
+    int attacker_bottom = attacker->SE.y;
 
-    if (attacker->x < defender->x) {
-        attack_end_x = attack_start_x + attacker->width + attack_range;
-    } else {
-        attack_start_x = attacker->x - attack_range;
-        attack_end_x = attacker->x + attacker->width;
-    }
-   // printf("%d ", attack_end_x);
-  //  fflush(stdout);
+    int defender_left = defender->NW.x;
+    int defender_right = defender->SE.x;
+    int defender_top = defender->NW.y;
+    int defender_bottom = defender->SE.y;
 
-    // Verifica se a hitbox do ataque e a hurtbox do defensor se sobrepõem
-    bool horizontal_overlap = (defender->x < attack_end_x && (defender->x + defender->width) > attack_start_x);
-    bool vertical_overlap = (defender->y - defender->height <= attacker->y && defender->y >= attacker->y - attacker->height);
+    bool horizontal_overlap = (attacker_right + attack_range >= defender_left) && (attacker_left - attack_range <= defender_right);
+    
+    bool vertical_overlap = ((attacker_bottom >= defender_bottom) && (attacker_top <= defender_top));
+
+    /* printPlayerStatistics(attacker, 1);
+    //printf("attacker right: %d defender left: %d", attacker_right, defender_left);
+    printPlayerStatistics(defender, 2);
+    //printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
+    //printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom);
+    printf("Horizontal overlap: %d, Vertical overlap: %d\n", horizontal_overlap, vertical_overlap); */
 
     return horizontal_overlap && vertical_overlap;
 }
 
+
 size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
     size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
         //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
-        {{59, 90}, {64, 90}, {64, 91}, {60, 94}, {61, 61}, {48, 70}, {53, 82}, {53, 82}, {48,70}, {61,61}, {48,70}, {61,61}},   // ken  -- DONE
-        {{60, 85}, {76, 87}, {56, 87}, {69, 97}, {72, 66}, {57, 65}, {55, 112}, {55, 112}, {48,70}, {61,61}, {48,70}, {61,61}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
+        {{60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}},   // ken  -- DONE
+        {{60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
         {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}},   // bison 
         {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}} // zangief
     };
@@ -43,8 +63,8 @@ size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS
     size** charSizes = malloc(4 * sizeof(size*)); 
 
     for (int i = 0; i < 4; i++) {
-        charSizes[i] = malloc(8 * sizeof(size)); 
-        memcpy(charSizes[i], initSizes[i], 8 * sizeof(size)); 
+        charSizes[i] = malloc(12 * sizeof(size)); 
+        memcpy(charSizes[i], initSizes[i], 12 * sizeof(size)); 
     }
 
     return charSizes;
@@ -62,7 +82,7 @@ void setDimensions(player *p, unsigned int width, unsigned int height) {
     p->height = height;
 }
 
-player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height) {						
+player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height, int direction) {						
 	if ((x > max_x) || (y > max_y)) {
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
@@ -71,7 +91,8 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
     if (!new) {
         fprintf(stderr, "Failed to allocate memory for player\n");
         return NULL;
-    }				
+    }			
+    new->direction = direction;	
     new->attack = 0;
     new->width = width;
     new->height = height;
@@ -102,17 +123,29 @@ void resetAttributes(player **p, unsigned int width, unsigned int height, unsign
 
 //p->x, py, p->x+p->width, py, p->x, py+p->height, p->x+p->width, py+p->height,
 void setHitbox(player *p) {
-    int py = p->y+SPRITE_HEIGHT;
+    int py = p->y + SPRITE_HEIGHT;
 
-    p->SW.x = p->x;
-    p->SW.y = py;
-    p->SE.x = p->x+p->width;
-    p->SE.y = py;
-    p->NW.x = p->x;
-    p->NW.y = py+p->height;
-    p->NE.x = p->x+p->width;
-    p->NE.y = py+p->height;
+    if (p->direction == LEFT) {
+        p->SW.x = p->x;
+        p->SW.y = py;
+        p->SE.x = p->x + p->width;
+        p->SE.y = py;
+        p->NW.x = p->x;
+        p->NW.y = py - p->height;
+        p->NE.x = p->x + p->width;
+        p->NE.y = py - p->height;
+    } else { // direction == RIGHT
+        p->SW.x = p->x - p->width + SPRITE_WIDTH;
+        p->SW.y = py;
+        p->SE.x = p->x + SPRITE_WIDTH;
+        p->SE.y = py;
+        p->NW.x = p->x - p->width + SPRITE_WIDTH;
+        p->NW.y = py - p->height;
+        p->NE.x = p->x + SPRITE_WIDTH;
+        p->NE.y = py - p->height;
+    }
 }
+
 
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {
     element->speed_y += GRAVITY*time;
@@ -127,14 +160,8 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
         element->speed_x = 0;
     }
 
- /*  // printf("\n\n\n%d | %d\n\n\n", element->SE.x, bounds);
-    if (element->SE.x >= bounds-28) { //arrumar || muito estranho
-        element->x = bounds-118;
+    if ((element->x <= 6) || (element->SE.x >= 600 - 6)) 
         element->speed_x = 0;
-    } else if (element->x <= 6) {
-        element->x = 6;
-        element->speed_x = 0;
-    } */
 
     setHitbox(element);
 }
@@ -143,7 +170,7 @@ void resetPlayer(player *element) {
     element->control->right = 0;
     element->control->left = 0;	
     element->control->up = 0;
-    //element->control->down = 0;
+    element->control->down = 0;
     element->control->up_left = 0;
     element->control->up_right = 0;
 }
@@ -195,7 +222,12 @@ void destroyPlayer(player *element){
 void printPlayerStatistics(player *p, int i) {
     printf("\n\n -- player %d -- \nisJumping: %d\nisDown: %d\nattack: %s\nheight: %d\nwidth: %d\nx: %d y: %d\nSW: (%d,%d) | SE: (%d,%d)\nNW: (%d,%d) | NE: (%d,%d)\npunching range: (%d, %d)\nkicking range: (%d, %d)", 
             i, p->isJumping, p->isDown,
-            !p->attack ? "NOT ATTACKING" : (p->attack == KICK ? "KICKING" : (p->attack == PUNCH ? "PUNCHING" : "ATTACK JUMPING OR DOWN")),
+            !p->attack ? "NOT ATTACKING" : (p->attack == ATTACK_KICK ? "KICKING" : 
+            (p->attack == ATTACK_PUNCH ? "PUNCHING" : 
+            ((p->attack == ATTACK_JUMPING_PUNCH) ? "JMP PUNCH" : 
+            ((p->attack == ATTACK_JUMPING_KICK) ? "JMP KICK" : 
+            ((p->attack == ATTACK_DOWN_KICK) ? "DWN KICK" : 
+            ((p->attack == ATTACK_DOWN_PUNCH) ? "DWN PUNCH" : "ERROR")))))),
             p->height, p->width,
             p->x, p->y, 
             p->SW.x, p->SW.y, p->SE.x, p->SE.y, p->NW.x, p->NW.y, p->NE.x, p->NE.y,

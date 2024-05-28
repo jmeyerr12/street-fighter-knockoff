@@ -43,6 +43,9 @@
 #define BISON 2
 #define ZANGIEF 3
 
+#define LEFT 0
+#define RIGHT 1
+
 typedef struct {
     unsigned int x,y;
 } coordinates;
@@ -59,13 +62,14 @@ typedef struct {
     int attack;
     int previous_movement;
     unsigned int estamina; //implementar (parece simples)
+    int direction;
 } player;
 
 typedef struct {
-    unsigned int height, width;
+    unsigned int width, height;
 } size;
 																											
-player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height);	
+player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height, int direction);	
 void movePlayer(player *element, char steps, unsigned char trajectory);			
 void destroyPlayer(player *element);					
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds);																	

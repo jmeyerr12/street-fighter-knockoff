@@ -2,14 +2,17 @@
 
 #include "street_fighter.h"		
 
-unsigned char collision_2D(player *element_first, player *element_second) {
-    int overlap_x = (element_first->x+6 > element_second->x) &&  //6 é um threshold
-                    (element_first->x < element_second->x+6);
+unsigned char collision_2D(player *p1, player *p2) {
+    setHitbox(p1);
+    setHitbox(p2);
 
-    int overlap_y = (element_first->y > element_second->y - element_second->height) && 
-                    (element_first->y - element_first->height < element_second->y);
+    int overlap_x = (p1->SE.x > p2->SW.x) &&  
+                    (p1->SW.x < p2->SE.x);   
 
-    int overlap_wall = (element_first->x <= 6) || (element_first->SE.x >= X_SCREEN-30);
+    int overlap_y = (p1->SE.y > p2->NW.y) && 
+                    (p1->NW.y < p2->SE.y);  
+
+    int overlap_wall = (p1->x <= 6) || (p1->SE.x >= X_SCREEN - 6);
 
     return (overlap_x && overlap_y) || overlap_wall;
 }
@@ -19,7 +22,6 @@ void try_move_player(player* p, player* other, int multiplier, int direction) {
     if (collision_2D(p, other)) {
         movePlayer(p, -multiplier, direction);
     }
-    if (p->SE.x >= X_SCREEN-30) p->x -= 2;
 }
 
 void update_position(player *player_1, player *player_2, float time) {
@@ -110,7 +112,7 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
         if (player_1->isJumping) {
             player_1->attack = ATTACK_JUMPING_PUNCH;
             *movement1 = JUMPING_PUNCH;
-        }else {
+        } else {
             player_1->attack = ATTACK_PUNCH;
             *movement1 = PUNCH;
         }
@@ -121,7 +123,7 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
         } else if (player_1->isDown) {
             player_1->attack = ATTACK_JUMPING_PUNCH;
             *movement1 = JUMPING_PUNCH;            
-        }else {
+        } else {
             player_1->attack = ATTACK_KICK;
             *movement1 = KICK;
         }
@@ -398,9 +400,13 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 update_position(player_1, player_2, deltaTime);
 
                 if (player_1->x > player_2->x) {
+                    player_1->direction = RIGHT;
+                    player_2->direction = LEFT;
                     draw_player(player1_sheet, player_1, frame1, movement1, 1);
                     draw_player(player2_sheet, player_2, frame2, movement2, 0);
                 } else {
+                    player_1->direction = LEFT;
+                    player_2->direction = RIGHT;
                     draw_player(player1_sheet, player_1, frame1, movement1, 0);
                     draw_player(player2_sheet, player_2, frame2, movement2, 1);
                 }
@@ -417,12 +423,12 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 updateDimensions(player_2, charSizes, movement2);
             }
         }
-        if (timer_count % 120 == 0) {
+      /*   if (timer_count % 120 == 0) {
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
             printPlayerStatistics(player_1, 1);
             printPlayerStatistics(player_2, 2);
-        }
+        } */
     }
 
     
@@ -444,8 +450,8 @@ int main() {
 
     al_register_event_source(queue, al_get_keyboard_event_source());
 
-    player* player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
-    player* player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
+    player* player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, LEFT);
+    player* player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, RIGHT);
 
     ALLEGRO_FONT *font = al_create_builtin_font();
     if (!font) {
