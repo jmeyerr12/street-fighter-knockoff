@@ -9,7 +9,9 @@ unsigned char collision_2D(player *element_first, player *element_second) {
     int overlap_y = (element_first->y > element_second->y - element_second->height) && 
                     (element_first->y - element_first->height < element_second->y);
 
-    return overlap_x && overlap_y;
+    int overlap_wall = (element_first->x <= 6) || (element_first->SE.x >= X_SCREEN-30);
+
+    return (overlap_x && overlap_y) || overlap_wall;
 }
 
 void try_move_player(player* p, player* other, int multiplier, int direction) {
@@ -17,6 +19,7 @@ void try_move_player(player* p, player* other, int multiplier, int direction) {
     if (collision_2D(p, other)) {
         movePlayer(p, -multiplier, direction);
     }
+    if (p->SE.x >= X_SCREEN-30) p->x -= 2;
 }
 
 void update_position(player *player_1, player *player_2, float time) {
@@ -60,6 +63,8 @@ void update_position(player *player_1, player *player_2, float time) {
         try_move_player(player_2, player_1, 1, 3);
     }
 
+    //updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN+player_1->width);
+    //updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN+player_2->width);
     updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
 }
@@ -227,6 +232,7 @@ void updateDimensions(player *p, size** charSizes, int movement) {
 void handle_down(player *p, int mv, int *frame, int maxFrames, int timer_count) {
     if (mv == GET_DOWN) {
         if (((*frame) < maxFrames) && timer_count % 10 == 0) (*frame)++;  
+        if (p->attack != 0 && (*frame) >= maxFrames) p->attack = 0;
     } else {     
         if (timer_count % 10 == 0) (*frame)++;  
         if (p->attack != 0 && (*frame) >= maxFrames) p->attack = 0;
@@ -439,7 +445,7 @@ int main() {
     al_register_event_source(queue, al_get_keyboard_event_source());
 
     player* player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
-    player* player_2 = buildPlayer(61, X_SCREEN-122, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
+    player* player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92);
 
     ALLEGRO_FONT *font = al_create_builtin_font();
     if (!font) {
@@ -466,9 +472,8 @@ int main() {
         switch (state) {
             case MENU:            
                 draw_menu(font, selected_option); 
-                if (event.type == ALLEGRO_EVENT_KEY_DOWN) { 
+               // if (event.type == ALLEGRO_EVENT_KEY_DOWN)
                     state = handle_menu_input(event, &selected_option);
-                }
                 break;
             case GAME:
                 ALLEGRO_BITMAP* player1_sheet;
@@ -493,6 +498,8 @@ int main() {
                     roundCounter++;
                 }
                 state = ENDGAME;
+                break;
+            case SINGLE_PLAYER:
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas

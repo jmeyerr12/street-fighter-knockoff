@@ -30,11 +30,15 @@ $(TARGET): $(OBJS)
 %.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $< $(ALLEGRO_FLAGS)
 
-# Limpar os arquivos objeto, o executável e outros arquivos não .c ou .h no diretório src
+# Limpar os arquivos objeto
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -f $(OBJS)
 	find $(SRC_DIR) ! -name '*.c' ! -name '*.h' -type f -exec rm -f {} +
 
+# Limpar tudo, incluindo o executável
+purge: clean
+	rm -f $(TARGET)
+
 # Regra para forçar a recompilação
-.PHONY: all clean
+.PHONY: all clean purge
 

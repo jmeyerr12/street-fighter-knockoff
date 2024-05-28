@@ -256,7 +256,6 @@ void draw_img_menu(ALLEGRO_FONT* font, int selected_option, background* bg) {
     al_flip_display();
 }
 
-
 void draw_menu(ALLEGRO_FONT* font, int selected_option) {
     al_clear_to_color(al_map_rgb(0, 0, 0));  // Limpa a tela com preto
 
@@ -266,34 +265,32 @@ void draw_menu(ALLEGRO_FONT* font, int selected_option) {
     al_draw_text(font, selected_option == MENU_START ? selected_color : normal_color,
                  X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Start Game");
 
+    al_draw_text(font, selected_option == MENU_SINGLE_PLAYER ? selected_color : normal_color,
+                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Single Player");
+
     al_draw_text(font, selected_option == MENU_EXIT ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Exit Game");
+                 X_SCREEN / 2, 2 * Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Exit Game");
 
     al_flip_display();
 }
-
 
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option) {
     if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
         switch (event.keyboard.keycode) {
             case UP_2:
-           // printf("UP/n"); fflush(stdout);
-                if (*selected_option == MENU_EXIT) {
-                    *selected_option = MENU_START;
-                } 
+                *selected_option = (*selected_option == MENU_START) ? MENU_EXIT : (*selected_option - 1);
                 break;
             case DOWN_2:
-        //    printf("DoWM/n"); fflush(stdout);
-                if (*selected_option == MENU_START) {
-                    *selected_option = MENU_EXIT;
-                }
+                *selected_option = (*selected_option == MENU_EXIT) ? MENU_START : (*selected_option + 1);
                 break;
             case ALLEGRO_KEY_ENTER:
-                return (*selected_option == MENU_START) ? GAME : EXIT;
+                if (*selected_option == MENU_START) return GAME;
+                if (*selected_option == MENU_SINGLE_PLAYER) return SINGLE_PLAYER;
+                if (*selected_option == MENU_EXIT) return EXIT;
+                break;
             case ALLEGRO_KEY_ESCAPE:
                 return EXIT;
         }
     }
-    return MENU;  // Continua no menu
+    return MENU;
 }
-

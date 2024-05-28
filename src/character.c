@@ -127,13 +127,14 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
         element->speed_x = 0;
     }
 
-    if (element->x+element->width*2 >= bounds) {
-        element->x = bounds-element->width*2;
+ /*  // printf("\n\n\n%d | %d\n\n\n", element->SE.x, bounds);
+    if (element->SE.x >= bounds-28) { //arrumar || muito estranho
+        element->x = bounds-118;
         element->speed_x = 0;
     } else if (element->x <= 6) {
         element->x = 6;
         element->speed_x = 0;
-    }
+    } */
 
     setHitbox(element);
 }

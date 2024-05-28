@@ -34,9 +34,11 @@
 #define GAME 1
 #define EXIT 2
 #define ENDGAME 3
+#define SINGLE_PLAYER 4
 
 #define MENU_START 0
-#define MENU_EXIT 1
+#define MENU_SINGLE_PLAYER 1
+#define MENU_EXIT 2
 
 #define NUM_SPRITES 10
 
