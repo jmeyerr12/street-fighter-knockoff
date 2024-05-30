@@ -417,7 +417,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 }
 
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
-/* int run_single_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
+ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
               ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
 
     size** charSizes = characterSizes();
@@ -501,7 +501,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 draw_animated_background(&bg);
 
                 const int player1_keys[] = {ALLEGRO_KEY_W, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_S, ALLEGRO_KEY_R, ALLEGRO_KEY_F};
-                handle_player_input(&key_state, player_1, player1_keys, movement1);
+                handle_player_input(&key_state, player_1, player1_keys, &movement1);
                 
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
@@ -550,7 +550,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     destroy_animated_background(&bg);
     freeCharacterSizes(charSizes);
     return isFim;
-} */
+} 
 
 int main() {
     al_init();
@@ -583,6 +583,9 @@ int main() {
     int sel1 = 0,sel2 = 1;
 
     srand(time(NULL));
+
+    ALLEGRO_BITMAP* player1_sheet;
+    ALLEGRO_BITMAP* player2_sheet;
     
     while (state != EXIT) {
         ALLEGRO_EVENT event;
@@ -596,8 +599,6 @@ int main() {
                     state = handle_menu_input(event, &selected_option);
                 break;
             case GAME:
-                ALLEGRO_BITMAP* player1_sheet;
-                ALLEGRO_BITMAP* player2_sheet;
                 show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
@@ -620,8 +621,6 @@ int main() {
                 state = ENDGAME;
                 break;
             case SINGLE_PLAYER:
-                /* ALLEGRO_BITMAP* player1_sheet;
-                ALLEGRO_BITMAP* player2_sheet;
                 show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
@@ -641,7 +640,7 @@ int main() {
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
                 }
-                state = ENDGAME; */
+                state = ENDGAME; 
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas
