@@ -427,6 +427,21 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
 }
 
+void handle_bot_input(player* p1, player* p2, int* movement) {
+    if (p2->x < p1->x) {
+        *movement = RIGHT;
+        joystick_right(p2->control);
+    } else if (p2->x > p1->x) {
+        *movement = LEFT;
+        joystick_left(p2->control);
+    }
+
+    if (abs(p2->x - p1->x) < 50) {
+        *movement = PUNCH; // Simples lógica de ataque quando perto
+        p2->attack = ATTACK_PUNCH;
+    }
+}
+
 // Retorna 0 em caso de empate, 1 em caso de vitória do player 1 e 2 em caso de vitória do player 2
 int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
               ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
@@ -518,16 +533,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 const int player1_keys[] = {ALLEGRO_KEY_W, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_S, ALLEGRO_KEY_R, ALLEGRO_KEY_F};
                 handle_player_input(&key_state, player_1, player1_keys, &movement1);
 
-                // Controle do Player 2 (bot)
-                if (player_2->x < player_1->x) {
-                    movement2 = RIGHT;
-                } else if (player_2->x > player_1->x) {
-                    movement2 = LEFT;
-                }
-
-                if (abs(player_2->x - player_1->x) < 50) {
-                    movement2 = ATTACK_PUNCH; // Simples lógica de ataque quando perto
-                }
+                handle_bot_input(player_1, player_2, &movement2);
                 
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
@@ -574,7 +580,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
             printPlayerStatistics(player_1, 1);
-            printPlayerStatistics(player_2, 2);
+            //printPlayerStatistics(player_2, 2);
         }
     }
 
