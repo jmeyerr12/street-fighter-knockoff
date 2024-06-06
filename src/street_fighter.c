@@ -1,5 +1,54 @@
 #include "street_fighter.h"
 
+int draw_pause(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
+    int selected_option = 1; 
+    bool done = false;
+
+    al_draw_filled_rectangle(X_SCREEN * 0.4, Y_SCREEN * 0.25, X_SCREEN * 0.6, Y_SCREEN * 0.6, al_map_rgb(0, 0, 0));
+
+    ALLEGRO_COLOR color_unselected = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR color_selected = al_map_rgb(255, 255, 0);
+
+    al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
+                    X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Menu");
+    al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
+                    X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Resume");
+
+    al_flip_display();
+
+    while (!done) {
+        ALLEGRO_EVENT event;
+        al_wait_for_event(queue, &event);
+
+        // Processa eventos
+        if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+            switch (event.keyboard.keycode) {
+                case ALLEGRO_KEY_UP:
+                case ALLEGRO_KEY_DOWN:
+                    selected_option = 1 - selected_option; // Alterna entre as opções
+                    break;
+                case ALLEGRO_KEY_ENTER:
+                    done = true; // Sai do loop ao pressionar ENTER
+                    break;
+                case ALLEGRO_KEY_ESCAPE:
+                    done = true; // Sai do loop ao pressionar ESCAPE
+                    break;
+            }
+
+            al_draw_filled_rectangle(X_SCREEN * 0.4, Y_SCREEN * 0.25, X_SCREEN * 0.6, Y_SCREEN * 0.6, al_map_rgb(0, 0, 0));
+
+            al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
+                         X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Menu");
+            al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
+                         X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Resume");
+
+            al_flip_display();
+        }
+    }
+
+    return selected_option == 0 ? MENU : GAME; // Retorna a opção selecionada
+}
+
 void draw_character_selection(ALLEGRO_BITMAP* sprite_sheet, int sprite_index, int x, int y, int sprite_dimension, ALLEGRO_COLOR color) { 
     int border_thickness = 2; 
     al_draw_rectangle(x, y, x + sprite_dimension, y + sprite_dimension, color, border_thickness);
