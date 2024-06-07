@@ -774,3 +774,7 @@ int main() {
     
     return 0;
 }
+
+// Arrumar tamanhos (matriz)
+// Investigar, com tudo 60 da certo, com os valores setados na mão ele da problema no ataque (chun li(tamanhos variados) vs ken (tamanho tudo 60))
+// Arrumar overlap_y no ataque, quando se abaixa nao esta funcionando, toma dano de soco que nao atinge
