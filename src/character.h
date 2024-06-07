@@ -46,6 +46,12 @@
 #define LEFT 0
 #define RIGHT 1
 
+typedef enum {
+    STATE_NORMAL,
+    STATE_DEFENSIVE,
+    STATE_AGGRESSIVE
+} player_state;
+
 typedef struct {
     unsigned int x,y;
 } coordinates;

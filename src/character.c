@@ -8,19 +8,19 @@ bool isInRange(player *attacker, player *defender, int attack) {
             attack_range = 30;  
             break;
         case KICK:
-            attack_range = 10;  
+            attack_range = 30;  
             break;
         case JUMPING_KICK:
-            attack_range = 10;  
+            attack_range = 30;  
             break;
         case JUMPING_PUNCH:
-            attack_range = 10;  
+            attack_range = 30;  
             break;
         case DOWN_KICK:
-            attack_range = 10;  
+            attack_range = 30;  
             break;
         case DOWN_PUNCH:
-            attack_range = 10;  
+            attack_range = 30;  
             break;
         default:
             return false;  
@@ -53,11 +53,11 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
 size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
     size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
-        //IDLE     WALKING   PUNCHING   KICKING   DOWN      JUMP     JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
-        {{60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}},   // ken  -- DONE
-        {{60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}, {60,60}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
-        {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}},   // bison 
-        {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}} // zangief
+        //IDLE     WALKING   PUNCHING  KICKING    DOWN     JUMP      JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
+        {{43, 87}, {43, 87}, {50, 87}, {50, 87}, {71, 66}, {50, 75}, {50, 75}, {50, 75}, {50, 75}, {71, 66}, {50, 75}, {71, 66}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
+        {{60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}},   // ken  -- DONE
+        {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}}, // zangief
+        {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}}   // bison 
     };
 
     size** charSizes = malloc(4 * sizeof(size*)); 

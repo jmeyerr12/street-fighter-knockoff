@@ -44,6 +44,12 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_1->control->down) {
         try_move_player(player_1, player_2, 1, 3);
     }
+    if (collision_2D(player_1, player_2)) { // dar uma olhada depois, da pra melhorar
+        if (player_1->direction == LEFT)
+            player_1->x+=3;
+        else 
+            player_1->x-=3;
+    }
 
     if (player_2->control->up_right) {
         try_move_player(player_2, player_1, 1, 5);
@@ -64,9 +70,13 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_2->control->down) {
         try_move_player(player_2, player_1, 1, 3);
     }
+    if (collision_2D(player_1, player_2)) { // dar uma olhada depois, da pra melhorar
+        if (player_2->direction == LEFT)
+            player_2->x+=3;
+        else 
+            player_2->x-=3;
+    }
 
-    //updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN+player_1->width);
-    //updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN+player_2->width);
     updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
 }
@@ -337,9 +347,9 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
             running = !running;
             if (running) {
-                lastTime = al_get_time() - pausedTime; // Adjust the timer when resuming
+                lastTime = al_get_time() - pausedTime; //adjust the timer when resuming
             } else {
-                pausedTime = al_get_time() - lastTime; // Record the time when pausing
+                pausedTime = al_get_time() - lastTime; //record the time when pausing
             }
         }
 
@@ -381,7 +391,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
                 update_position(player_1, player_2, deltaTime);
 
-                if (player_1->x > player_2->x) {
+                if ((player_1->SE.x + player_1->SW.x)/2 > (player_2->SE.x + player_2->SW.x)/2) {
                     player_1->direction = RIGHT;
                     player_2->direction = LEFT;
                     draw_player(player1_sheet, player_1, frame1, movement1, 1);
@@ -427,24 +437,93 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
 }
 
-void handle_bot_input(player* p1, player* p2, int* movement) {
-    if (p2->x < p1->x) {
-        *movement = RIGHT;
-        joystick_right(p2->control);
-    } else if (p2->x > p1->x) {
-        *movement = LEFT;
-        joystick_left(p2->control);
+player_state determine_state(player* p) {
+    if (p->health <= 250) {
+        return STATE_DEFENSIVE; //saúde baixa, modo defensivo
+    } else if (p->health >= 750) {
+        return STATE_AGGRESSIVE; //saúde alta, modo agressivo
+    } else {
+        return STATE_NORMAL; //saúde intermediária, estado normal
     }
+}
 
-    if (abs(p2->x - p1->x) < 50) {
-        *movement = PUNCH; // Simples lógica de ataque quando perto
-        p2->attack = ATTACK_PUNCH;
+void handle_bot_input(player* p1, player* p2, int* movement) {
+    int distance;
+    if (p2->direction == RIGHT) distance = p1->SE.x - p2->SW.x;
+    else distance = p1->SW.x - p2->SE.x;
+    player_state state = determine_state(p2); // Determina o estado do bot
+
+    if (state == STATE_DEFENSIVE) {
+        if (distance > 0) {
+            *movement = LEFT;
+            joystick_left(p2->control);
+        } else {
+            *movement = RIGHT;
+            joystick_right(p2->control);
+        }
+    } else if (state == STATE_AGGRESSIVE) {
+        if (distance > 50 && p2->attack == 0) {
+            *movement = RIGHT;
+            joystick_right(p2->control);
+        } else if (distance < -50 && p2->attack == 0) {
+            *movement = LEFT;
+            joystick_left(p2->control);
+        } else if (abs(distance) < 50 && p2->attack == 0) {
+            int attack_choice = 0;//rand() % 3;  //ataque aleatorio
+            switch (attack_choice) {
+                case 0:
+                    *movement = PUNCH;
+                    p2->attack = ATTACK_PUNCH;
+                    break;
+                case 1:
+                    *movement = KICK;
+                    p2->attack = ATTACK_KICK;
+                    break;
+                case 2:
+                    *movement = DOWN_KICK;
+                    p2->attack = ATTACK_DOWN_KICK;
+                    break;
+                default:
+                    break;
+            }
+        }
+    } else {
+        if (distance > 200) {
+            *movement = RIGHT;
+            joystick_right(p2->control);
+        } else if (distance < -200) {
+            *movement = LEFT;
+            joystick_left(p2->control);
+        } else {
+            *movement = IDLE;
+            resetPlayer(p2);
+        }
+
+        if (abs(distance) < 50 && p2->attack == 0) {
+            int attack_choice = rand() % 3; // Aleatoriamente escolhe entre os ataques
+            switch (attack_choice) {
+                case 0:
+                    *movement = PUNCH;
+                    p2->attack = ATTACK_PUNCH;
+                    break;
+                case 1:
+                    *movement = KICK;
+                    p2->attack = ATTACK_KICK;
+                    break;
+                case 2:
+                    *movement = DOWN_KICK;
+                    p2->attack = ATTACK_DOWN_KICK;
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 }
 
 // Retorna 0 em caso de empate, 1 em caso de vitória do player 1 e 2 em caso de vitória do player 2
 int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
-              ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
+    ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
 
     size** charSizes = characterSizes();
     setDimensions(player_1, charSizes[player_1->sprite][IDLE].width, charSizes[player_1->sprite][IDLE].height);
@@ -500,13 +579,13 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
             running = !running;
             if (running) {
-                lastTime = al_get_time() - pausedTime; // Reset the timer when resuming
+                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
             } else {
-                pausedTime = al_get_time() - lastTime; // Record the time when pausing
+                pausedTime = al_get_time() - lastTime; // record the time when pausing
                 int pause_option = draw_pause(font, queue);
                 if (pause_option == MENU) break;
                 running = 1;
-                lastTime = al_get_time() - pausedTime; // Reset the timer when resuming
+                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
             }
         }
 
@@ -551,7 +630,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
 
                 update_position(player_1, player_2, deltaTime);
 
-                if (player_1->x > player_2->x) {
+                if (player_1->SE.x > player_2->SW.x) {
                     player_1->direction = RIGHT;
                     player_2->direction = LEFT;
                     draw_player(player1_sheet, player_1, frame1, movement1, 1);
@@ -580,7 +659,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
             printPlayerStatistics(player_1, 1);
-            //printPlayerStatistics(player_2, 2);
+            printPlayerStatistics(player_2, 2);
         }
     }
 
@@ -667,9 +746,7 @@ int main() {
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) {
                     int resultado = run_single_player(queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
-                    if (resultado == 0) { //em caso de empate o vencedor é sorteado
-                        resultado = 1 + rand() % 2;
-                    }
+                    if (resultado == 0) resultado = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
                     else break; //clicou para sair
