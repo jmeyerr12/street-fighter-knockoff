@@ -447,13 +447,44 @@ player_state determine_state(player* p) {
     }
 }
 
+int choose_attack(player* p, int* movement) {
+    int attack_choice = rand() % 4; // Aleatoriamente escolhe entre os ataques
+    switch (attack_choice) {
+        case 0:
+            *movement = PUNCH;
+            p->attack = ATTACK_PUNCH;
+            break;
+        case 1:
+            *movement = KICK;
+            p->attack = ATTACK_KICK;
+            break;
+        case 2:
+            *movement = DOWN_KICK;
+            p->attack = ATTACK_DOWN_KICK;
+            break;
+        case 3:
+            *movement = DOWN_PUNCH;
+            p->attack = ATTACK_DOWN_PUNCH;
+            break;
+        default:
+            break;
+    }
+    return *movement;
+}
+
+// Função para lidar com a entrada do bot
 void handle_bot_input(player* p1, player* p2, int* movement) {
     int distance;
-    if (p2->direction == RIGHT) distance = p1->SE.x - p2->SW.x;
-    else distance = p1->SW.x - p2->SE.x;
+    if (p2->direction == RIGHT) {
+        distance = p1->SE.x - p2->SW.x;
+    } else {
+        distance = p1->SW.x - p2->SE.x;
+    }
+
     player_state state = determine_state(p2); // Determina o estado do bot
 
     if (state == STATE_DEFENSIVE) {
+        // Modo defensivo, tenta se afastar do jogador 1 e se agachar
         if (distance > 0) {
             *movement = LEFT;
             joystick_left(p2->control);
@@ -461,62 +492,49 @@ void handle_bot_input(player* p1, player* p2, int* movement) {
             *movement = RIGHT;
             joystick_right(p2->control);
         }
-    } else if (state == STATE_AGGRESSIVE) {
-        if (distance > 50 && p2->attack == 0) {
-            *movement = RIGHT;
-            joystick_right(p2->control);
-        } else if (distance < -50 && p2->attack == 0) {
-            *movement = LEFT;
-            joystick_left(p2->control);
-        } else if (abs(distance) < 50 && p2->attack == 0) {
-            int attack_choice = 0;//rand() % 3;  //ataque aleatorio
-            switch (attack_choice) {
-                case 0:
-                    *movement = PUNCH;
-                    p2->attack = ATTACK_PUNCH;
-                    break;
-                case 1:
-                    *movement = KICK;
-                    p2->attack = ATTACK_KICK;
-                    break;
-                case 2:
-                    *movement = DOWN_KICK;
-                    p2->attack = ATTACK_DOWN_KICK;
-                    break;
-                default:
-                    break;
+
+        if (abs(distance) < 20 && p2->attack == 0) {
+            int action_choice = rand() % 2; // Aleatoriamente escolhe entre se agachar e atacar
+            if (action_choice == 0) {
+                *movement = GET_DOWN;
+                p2->isDown = 1;
+            } else {
+                choose_attack(p2, movement);
             }
         }
+
+    } else if (state == STATE_AGGRESSIVE) {
+        // Modo agressivo, tenta se aproximar e atacar o jogador 1
+        if (abs(distance) > 20 && p2->attack == 0) {
+            if (distance > 0) {
+                *movement = RIGHT;
+                joystick_right(p2->control);
+            } else {
+                *movement = LEFT;
+                joystick_left(p2->control);
+            }
+        } else if (abs(distance) <= 60 && p2->attack == 0) {
+            // Atacar se estiver perto o suficiente
+            choose_attack(p2, movement);
+        }
+
     } else {
-        if (distance > 200) {
-            *movement = RIGHT;
-            joystick_right(p2->control);
-        } else if (distance < -200) {
-            *movement = LEFT;
-            joystick_left(p2->control);
+        // Estado normal, comportamento padrão
+        if (abs(distance) > 100) {
+            if (distance > 0) {
+                *movement = RIGHT;
+                joystick_right(p2->control);
+            } else {
+                *movement = LEFT;
+                joystick_left(p2->control);
+            }
         } else {
             *movement = IDLE;
             resetPlayer(p2);
         }
 
-        if (abs(distance) < 50 && p2->attack == 0) {
-            int attack_choice = rand() % 3; // Aleatoriamente escolhe entre os ataques
-            switch (attack_choice) {
-                case 0:
-                    *movement = PUNCH;
-                    p2->attack = ATTACK_PUNCH;
-                    break;
-                case 1:
-                    *movement = KICK;
-                    p2->attack = ATTACK_KICK;
-                    break;
-                case 2:
-                    *movement = DOWN_KICK;
-                    p2->attack = ATTACK_DOWN_KICK;
-                    break;
-                default:
-                    break;
-            }
+        if (abs(distance) <= 60 && p2->attack == 0) {
+            choose_attack(p2, movement);
         }
     }
 }
@@ -557,6 +575,8 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
         draw_player(player1_sheet, player_1, frame1, movement1, 0);
         draw_player(player2_sheet, player_2, frame2, movement2, 1);
     }
+    setHitbox(player_1);
+    setHitbox(player_2);
     draw_scoreboard(player_1->health,player_2->health,X_SCREEN,font,countdown,round,p1Wins,p2Wins);   
 
     char roundText[100];

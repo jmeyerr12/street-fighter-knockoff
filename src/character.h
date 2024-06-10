@@ -11,16 +11,16 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_image.h>			
 
+#define STEP 2	
+#define GRAVITY 300
+#define INITIAL_JUMP_SPEED -240.0	
+
 #define ATTACK_PUNCH 1
 #define ATTACK_KICK 2
 #define ATTACK_JUMPING_KICK 3
 #define ATTACK_DOWN_PUNCH 4
 #define ATTACK_JUMPING_PUNCH 5
 #define ATTACK_DOWN_KICK 6
-
-#define STEP 2	
-#define GRAVITY 300
-#define INITIAL_JUMP_SPEED -240.0	
 
 #define IDLE 0
 #define WALK 1

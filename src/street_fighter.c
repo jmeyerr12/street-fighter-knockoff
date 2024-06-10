@@ -312,7 +312,7 @@ void draw_menu(ALLEGRO_FONT* font, int selected_option) {
     ALLEGRO_COLOR selected_color = al_map_rgb(255, 255, 0);
 
     al_draw_text(font, selected_option == MENU_START ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Start Game");
+                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Multiplayer");
 
     al_draw_text(font, selected_option == MENU_SINGLE_PLAYER ? selected_color : normal_color,
                  X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Single Player");
