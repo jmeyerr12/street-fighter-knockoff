@@ -235,7 +235,15 @@ void update_animated_background(background* bg) {
 }
 
 void draw_animated_background(const background* bg) {
-    al_draw_bitmap(bg->frames[bg->current_frame], 0, 0, 0);
+    int original_width = al_get_bitmap_width(bg->frames[bg->current_frame]);
+    int original_height = al_get_bitmap_height(bg->frames[bg->current_frame]);
+
+    al_draw_scaled_bitmap(bg->frames[bg->current_frame], 
+                          0, 0, 
+                          original_width, original_height,
+                          0, 0,
+                          X_SCREEN, Y_SCREEN, 
+                          0); 
 }
 
 void destroy_animated_background(background* bg) {

@@ -701,8 +701,11 @@ int main() {
 
     al_register_event_source(queue, al_get_keyboard_event_source());
 
-    player* player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, LEFT);
-    player* player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, RIGHT);
+    player* player_1; 
+    player* player_2; 
+    
+    ALLEGRO_BITMAP* player1_sheet;
+    ALLEGRO_BITMAP* player2_sheet;
 
     ALLEGRO_FONT *font = al_create_builtin_font();
     if (!font) {
@@ -720,9 +723,6 @@ int main() {
     int sel1 = 0,sel2 = 1;
 
     srand(time(NULL));
-
-    ALLEGRO_BITMAP* player1_sheet;
-    ALLEGRO_BITMAP* player2_sheet;
     
     while (state != EXIT) {
         ALLEGRO_EVENT event;
@@ -736,6 +736,8 @@ int main() {
                     state = handle_menu_input(event, &selected_option);
                 break;
             case GAME:
+                player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, LEFT);
+                player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, RIGHT);
                 show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
@@ -755,9 +757,17 @@ int main() {
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
                 }
+                al_destroy_bitmap(player1_sheet);
+                al_destroy_bitmap(player2_sheet);
+                joystick_destroy(player_1->control);
+                joystick_destroy(player_2->control);
+                free(player_1);
+                free(player_2);
                 state = ENDGAME;
                 break;
             case SINGLE_PLAYER:
+                player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, LEFT);
+                player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, RIGHT);
                 show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
@@ -775,10 +785,18 @@ int main() {
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
                 }
+                al_destroy_bitmap(player1_sheet);
+                al_destroy_bitmap(player2_sheet);
+                joystick_destroy(player_1->control);
+                joystick_destroy(player_2->control);
+                free(player_1);
+                free(player_2);
                 state = ENDGAME; 
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas
+                p1Wins = 0; p2Wins = 0;
+                roundCounter = 0;
                 state = MENU;
                 break;
         }
