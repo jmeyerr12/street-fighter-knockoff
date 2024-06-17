@@ -34,6 +34,7 @@
 #define JUMPING_KICK 9
 #define JUMPING_PUNCH 10
 #define DOWN_KICK 11
+#define DAMAGED 12
 
 #define SPRITE_HEIGHT 112
 #define SPRITE_WIDTH 112
@@ -69,6 +70,7 @@ typedef struct {
     int previous_movement;
     unsigned int estamina; //implementar (parece simples)
     int direction;
+    int isBeingHit;
 } player;
 
 typedef struct {

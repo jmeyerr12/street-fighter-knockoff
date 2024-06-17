@@ -87,55 +87,60 @@ void draw_player(ALLEGRO_BITMAP* p, player* player, int current, int movement, i
 
 
 void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int keys[], int* movement) {
-    if (al_key_down(key_state, keys[0])) { // UP
-        if (al_key_down(key_state, keys[2])) { // RIGHT
-            joystick_up_right(p->control);
-            *movement = JUMP_FWD;
+    if (!p->isBeingHit) {    
+        if (al_key_down(key_state, keys[0])) { // UP
+            if (al_key_down(key_state, keys[2])) { // RIGHT
+                joystick_up_right(p->control);
+                *movement = JUMP_FWD;
+            } else if (al_key_down(key_state, keys[1])) { // LEFT
+                joystick_up_left(p->control);
+                *movement = JUMP_BCK;
+            } else {
+                joystick_up(p->control);
+                *movement = JUMP;
+            }
+        } else if (al_key_down(key_state, keys[3])) { // DOWN
+            if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
+                *movement = DOWN_PUNCH;
+                p->attack = ATTACK_DOWN_PUNCH;
+            } else if (al_key_down(key_state, keys[5]) && p->attack == 0) { // KICK
+                *movement = DOWN_KICK;
+                p->attack = ATTACK_DOWN_KICK;
+            } else {
+                *movement = GET_DOWN;
+            }
+            p->isDown = 1;
         } else if (al_key_down(key_state, keys[1])) { // LEFT
-            joystick_up_left(p->control);
-            *movement = JUMP_BCK;
-        } else {
-            joystick_up(p->control);
-            *movement = JUMP;
-        }
-    } else if (al_key_down(key_state, keys[3])) { // DOWN
-        if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
-            *movement = DOWN_PUNCH;
-            p->attack = ATTACK_DOWN_PUNCH;
+            joystick_left(p->control);
+            *movement = WALK;
+        } else if (al_key_down(key_state, keys[2])) { // RIGHT
+            joystick_right(p->control);
+            *movement = WALK;
+        } else if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
+            if (p->isJumping) {
+                p->attack = ATTACK_JUMPING_PUNCH;
+                *movement = JUMPING_PUNCH;
+            } else {
+                p->attack = ATTACK_PUNCH;
+                *movement = PUNCH;
+            }
         } else if (al_key_down(key_state, keys[5]) && p->attack == 0) { // KICK
-            *movement = DOWN_KICK;
-            p->attack = ATTACK_DOWN_KICK;
+            if (p->isJumping) {
+                p->attack = ATTACK_JUMPING_KICK;
+                *movement = JUMPING_KICK;
+            } else if (p->isDown) {
+                p->attack = ATTACK_JUMPING_PUNCH;
+                *movement = JUMPING_PUNCH;
+            } else {
+                p->attack = ATTACK_KICK;
+                *movement = KICK;
+            }
         } else {
-            *movement = GET_DOWN;
-        }
-        p->isDown = 1;
-    } else if (al_key_down(key_state, keys[1])) { // LEFT
-        joystick_left(p->control);
-        *movement = WALK;
-    } else if (al_key_down(key_state, keys[2])) { // RIGHT
-        joystick_right(p->control);
-        *movement = WALK;
-    } else if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
-        if (p->isJumping) {
-            p->attack = ATTACK_JUMPING_PUNCH;
-            *movement = JUMPING_PUNCH;
-        } else {
-            p->attack = ATTACK_PUNCH;
-            *movement = PUNCH;
-        }
-    } else if (al_key_down(key_state, keys[5]) && p->attack == 0) { // KICK
-        if (p->isJumping) {
-            p->attack = ATTACK_JUMPING_KICK;
-            *movement = JUMPING_KICK;
-        } else if (p->isDown) {
-            p->attack = ATTACK_JUMPING_PUNCH;
-            *movement = JUMPING_PUNCH;
-        } else {
-            p->attack = ATTACK_KICK;
-            *movement = KICK;
+            *movement = IDLE;
         }
     } else {
-        *movement = IDLE;
+        *movement = DAMAGED;
+        p->speed_x = p->direction ? 1 : -1;
     }
 }
 
@@ -187,6 +192,9 @@ int countFrames(int movement) {
         case JUMPING_PUNCH:
             return 8;
             break; 
+        case DAMAGED:
+            return 3;
+            break;
         default:
             return -100;
             break;
@@ -232,6 +240,10 @@ void handle_down(player *p, int mv, int *frame, int maxFrames, int timer_count) 
     }
 }
 
+void being_hit(player *p, int mv, int *frame, int maxFrames) {
+    if (*frame == maxFrames && mv == DAMAGED) p->isBeingHit = 0;
+}
+
 void handle_jump(player *p, player *opponent, int *movement) {
     if (p->attack == 0) {
         if (p->isJumping == 1) (*movement) = JUMP;
@@ -251,36 +263,42 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
         if (isInRange(p, opponent, KICK) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else if (p->attack == ATTACK_PUNCH) {
         *movement = PUNCH;
         if (isInRange(p, opponent, PUNCH) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else if (p->attack == ATTACK_JUMPING_KICK) {
         *movement = JUMPING_KICK;
         if (isInRange(p, opponent, JUMPING_KICK) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else if (p->attack == ATTACK_DOWN_PUNCH) {
         *movement = DOWN_PUNCH;
         if (isInRange(p, opponent, DOWN_PUNCH) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else if (p->attack == ATTACK_DOWN_KICK) {
         *movement = DOWN_KICK;
         if (isInRange(p, opponent, DOWN_KICK) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else if (p->attack == ATTACK_JUMPING_PUNCH) {
         *movement = JUMPING_PUNCH;
         if (isInRange(p, opponent, JUMPING_PUNCH) && !(*alreadyDamaged)) {
             *alreadyDamaged = 1;
             opponent->health -= 30; // implementar sprite de sofrendo ataque!!
+            opponent->isBeingHit = 1;
         }
     } else *alreadyDamaged = 0;
 }
@@ -378,6 +396,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
                 handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
+                being_hit(player_1, movement1, &frame1, maxFrame1);
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
@@ -385,6 +404,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
                 handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
+                being_hit(player_2, movement2, &frame2, maxFrame2);
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;

@@ -105,7 +105,8 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
 	new->x = x;										
 	new->y = y;	
     new->health = 1000;									
-	new->control = joystick_create();									
+	new->control = joystick_create();		
+    new->isBeingHit = 0;							
 	return new;						
 }
 
