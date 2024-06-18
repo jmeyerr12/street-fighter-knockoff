@@ -81,10 +81,20 @@ void update_position(player *player_1, player *player_2, float time) {
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
 }
 
-void draw_player(ALLEGRO_BITMAP* p, player* player, int current, int movement, int inverted) {
+/* void draw_player(ALLEGRO_BITMAP* p, player* player, int current, int movement, int inverted) {
     al_draw_bitmap_region(p, 112*current, 112*movement, 112, 112, player->x, player->y, inverted? ALLEGRO_FLIP_HORIZONTAL : 0);
-}
+} */
 
+void draw_player(ALLEGRO_BITMAP* p, player* player, int current, int movement, int inverted) {
+  al_draw_bitmap_region(p, 
+                          112*current,                        // Posição x inicial no sprite sheet
+                          112*movement,                       // Posição y inicial no sprite sheet
+                          112,                        // Largura do sprite
+                          112,                       // Altura do sprite
+                          inverted ? player->x + player->width - 112 : player->x,  // Posição x na tela, ajustada para inversão
+                          player->y,                         // Posição y na tela
+                          inverted ? ALLEGRO_FLIP_HORIZONTAL : 0);  // Flag para inverter o sprite
+}
 
 void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int keys[], int* movement) {
     if (!p->isBeingHit) {    

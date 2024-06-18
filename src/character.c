@@ -54,8 +54,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
 size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
     size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
         //IDLE     WALKING   PUNCHING  KICKING    DOWN     JUMP      JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
-        {{60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 20}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
-        {{60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 20}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}, {60, 60}},   // ken  -- DONE
+        {{72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
+        {{60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}},   // ken  -- DONE
         {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}}, // zangief
         {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}}   // bison 
     };
