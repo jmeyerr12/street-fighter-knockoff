@@ -35,6 +35,8 @@
 #define JUMPING_PUNCH 10
 #define DOWN_KICK 11
 #define DAMAGED 12
+#define DAMAGED_JMP 13
+#define DAMAGED_DOWN 14
 
 #define SPRITE_HEIGHT 112
 #define SPRITE_WIDTH 112

@@ -139,7 +139,9 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
             *movement = IDLE;
         }
     } else {
-        *movement = DAMAGED;
+        /* if (p->isDown) *movement = DAMAGED_DOWN;
+        else if (p->isJumping) *movement = DAMAGED_JMP;
+        else */ *movement = DAMAGED; //arrumar esse trecho, jump e down nao funcionam
         p->speed_x = p->direction ? 1 : -1;
     }
 }
@@ -195,6 +197,12 @@ int countFrames(int movement) {
         case DAMAGED:
             return 3;
             break;
+        case DAMAGED_JMP:
+            return 7;
+            break;
+        case DAMAGED_DOWN:
+            return 3;
+            break;
         default:
             return -100;
             break;
@@ -241,7 +249,7 @@ void handle_down(player *p, int mv, int *frame, int maxFrames, int timer_count) 
 }
 
 void being_hit(player *p, int mv, int *frame, int maxFrames) {
-    if (*frame == maxFrames && mv == DAMAGED) p->isBeingHit = 0;
+    if (*frame == maxFrames && (mv == DAMAGED || mv == DAMAGED_DOWN || mv == DAMAGED_JMP)) p->isBeingHit = 0;
 }
 
 void handle_jump(player *p, player *opponent, int *movement) {
