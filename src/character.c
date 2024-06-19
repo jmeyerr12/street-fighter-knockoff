@@ -1,7 +1,10 @@
 #include "character.h"
 
 bool isInRange(player *attacker, player *defender, int attack) {
-    int attack_range;
+    int ranges[4][6] = {{30, 30, 30, 30, 30, 30},
+    {30, 30, 30, 30, 30, 30},
+    {30, 30, 30, 30, 30, 30},
+    {30, 30, 30, 30, 30, 30}};
 
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
@@ -15,38 +18,38 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
     switch (attack) {
         case PUNCH:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_PUNCH-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
             attacker_bottom = attacker->SE.y - 60;
             break;
         case KICK:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_KICK-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_KICK-1] : 0);
             attacker_top = attacker->NW.y + 40;
             attacker_bottom = attacker->SE.y;
             break;
         case JUMPING_KICK:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_JUMPING_KICK-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_JUMPING_KICK-1] : 0);
             attacker_top = attacker->NW.y;
             attacker_bottom = attacker->SE.y + 60;
             break;
         case JUMPING_PUNCH:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_JUMPING_PUNCH-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_JUMPING_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
             attacker_bottom = attacker->SE.y + 60;
             break;
         case DOWN_KICK:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_DOWN_KICK-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_DOWN_KICK-1] : 0);
             attacker_top = attacker->NW.y;
             attacker_bottom = attacker->SE.y + 60;
             break;
         case DOWN_PUNCH:
-            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
-            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_DOWN_PUNCH-1]);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_DOWN_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
             attacker_bottom = attacker->SE.y + 60;
             break;
@@ -68,8 +71,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
 /*     printf("Horizontal overlap: %d, Vertical overlap: %d\n", horizontal_overlap, vertical_overlap);  
 */
-    printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
-    printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom); 
+/*     printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
+    printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom);  */
 
     return horizontal_overlap && vertical_overlap;
 }

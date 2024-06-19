@@ -159,12 +159,6 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
                 *movement = GET_DOWN;
             }
             p->isDown = 1;
-        } else if (al_key_down(key_state, keys[1])) { // LEFT
-            joystick_left(p->control);
-            *movement = WALK;
-        } else if (al_key_down(key_state, keys[2])) { // RIGHT
-            joystick_right(p->control);
-            *movement = WALK;
         } else if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
             if (p->isJumping) {
                 p->attack = ATTACK_JUMPING_PUNCH;
@@ -189,15 +183,26 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
                 *movement = KICK;
                 p->stamina-=STAMINA_DECREASE;
             }
+        } else if (al_key_down(key_state, keys[1])) { // LEFT
+            joystick_left(p->control);
+            *movement = WALK;
+        } else if (al_key_down(key_state, keys[2])) { // RIGHT
+            joystick_right(p->control);
+            *movement = WALK;
         } else *movement = IDLE;
         if (p->stamina < 0) p->stamina = 0;
     } else {
-        /* if (p->isDown) *movement = DAMAGED_DOWN;
-        else if (p->isJumping) *movement = DAMAGED_JMP;
-        else */ *movement = DAMAGED; //arrumar esse trecho, jump e down nao funcionam
+        printf("isDown: %d\nisJumping: %d\n\n", p->isDown, p->isJumping);
+        if (p->isDown || p->isBeingHit == 2) {
+            p->isBeingHit = 2;
+            *movement = DAMAGED_DOWN;
+        } else if (p->isJumping || p->isBeingHit == 3) {
+            p->isBeingHit = 3;
+            *movement = DAMAGED_JMP;
+        } else *movement = DAMAGED; //arrumar esse trecho, jump e down nao funcionam
         p->speed_x = p->direction ? 1 : -1;
     }
-}
+} 
 
 void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* player_2, int *movement1, int *movement2) {
     al_get_keyboard_state(key_state);
@@ -306,7 +311,7 @@ void being_hit(player *p, int mv, int *frame, int maxFrames) {
 }
 
 void handle_jump(player *p, player *opponent, int *movement) {
-    if (p->attack == 0) {
+    if (p->attack == 0 && p->isBeingHit == 0) {
         if (p->isJumping == 1) (*movement) = JUMP;
         else if (p->isJumping == 2 && (p->x > opponent->x)) (*movement) = JUMP_FWD;
         else if (p->isJumping == 3 && (p->x > opponent->x)) (*movement) = JUMP_BCK;
@@ -459,18 +464,18 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
                 handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
-                being_hit(player_1, movement1, &frame1, maxFrame1);
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
+                being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
                 handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
-                being_hit(player_2, movement2, &frame2, maxFrame2);
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;
+                being_hit(player_2, movement2, &frame2, maxFrame2);
 
                 if (timer_count % 4 == 0) {
                     recharge_stamina(player_1);
