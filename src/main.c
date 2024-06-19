@@ -281,7 +281,7 @@ void showWinner(ALLEGRO_FONT *font, int winner) {
                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "DRAW");
     } else {
         char text[100];
-        sprintf(text, "PLAYER %d WINS", winner);
+        sprintf(text, "PLAYER %d WINS THE ROUND", winner);
         al_draw_text(font, al_map_rgb(255, 255, 0),
                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, text);
     }
@@ -735,6 +735,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
+                being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
@@ -742,6 +743,12 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;
+                being_hit(player_1, movement1, &frame1, maxFrame1);
+
+                if (timer_count % 4 == 0) {
+                    recharge_stamina(player_1);
+                    recharge_stamina(player_2);
+                }
 
                 update_position(player_1, player_2, deltaTime);
 

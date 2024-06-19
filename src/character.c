@@ -1,10 +1,10 @@
 #include "character.h"
 
 bool isInRange(player *attacker, player *defender, int attack) {
-    int ranges[4][6] = {{30, 30, 30, 30, 30, 30},
-    {30, 30, 30, 30, 30, 30},
-    {30, 30, 30, 30, 30, 30},
-    {30, 30, 30, 30, 30, 30}};
+    int ranges[4][6] = {{30, 30, 30, 30, 30, 30}, //chun li
+    {30, 30, 30, 30, 30, 30}, //ken
+    {30, 30, 30, 30, 30, 30}, //zangief
+    {30, 30, 30, 30, 30, 30}}; //bison
 
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
