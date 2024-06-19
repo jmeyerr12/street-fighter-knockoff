@@ -178,14 +178,14 @@ void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_s
     al_destroy_timer(timer);   
 }
 
-void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2) {
+void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2, unsigned int stamina1, unsigned int stamina2) {
     int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
     int norma_size2=((x/2)+((score2*100)/x));
 
     char mid_text[100];
     sprintf(mid_text, "%d", countdown);
     int mid_text_x = x / 2 - al_get_text_width(font, mid_text) / 2;
-    int mid_text_y = 25; 
+    int mid_text_y = 30; 
     
     char score1_text[100], score2_text[100];
     sprintf(score1_text, "%d", score1 >= 0 ? score1 : 0);
@@ -197,16 +197,29 @@ void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int coun
     char points[100];
     sprintf(points, "%d x %d", points1, points2);
     
-    al_draw_text(font, al_map_rgb(255, 0, 0), norma_size1 - 50, 10, 0, score1_text);
-    al_draw_text(font, al_map_rgb(0, 0, 255), norma_size2 + 50, 10, 0, score2_text);
+    al_draw_text(font, al_map_rgb(255, 0, 0), norma_size1 - 50, 15, 0, score1_text);
+    al_draw_text(font, al_map_rgb(0, 0, 255), norma_size2 + 20, 15, 0, score2_text);
 
     al_draw_text(font, al_map_rgb(255, 255, 0), x/2-100000/x, mid_text_y, 0, round_atual);
     al_draw_text(font, al_map_rgb(255, 255, 0), x/2+75000/x, mid_text_y, 0, points);
     
-    al_draw_filled_rectangle(norma_size1, 5,
-                             x/2, 20, al_map_rgb(255, 0, 0));
-    al_draw_filled_rectangle(norma_size2, 5,
-                             x/2, 20, al_map_rgb(0, 0, 255));
+    //vida
+    al_draw_filled_rectangle(norma_size1, 10,
+                             x/2, 25, al_map_rgb(255, 0, 0));
+    al_draw_filled_rectangle(norma_size2, 10,
+                             x/2, 25, al_map_rgb(0, 0, 255));
+
+    //stamina
+
+    al_draw_filled_rectangle(x/2-100000/x, 3,
+                              x/2-100000/x + 100, 7, al_map_rgb(255, 255, 255));
+    al_draw_filled_rectangle(x/2+100000/x - 100, 3,
+                              x/2+100000/x, 7, al_map_rgb(255, 255, 255));
+
+    al_draw_filled_rectangle(x/2-100000/x, 4,
+                              x/2-100000/x + stamina1, 6, al_map_rgb(255, 255, 0));
+    al_draw_filled_rectangle(x/2+100000/x - stamina2, 4,
+                              x/2+100000/x, 6, al_map_rgb(255, 255, 0));
 
     al_draw_text(font, al_map_rgb(255, 255, 0), mid_text_x, mid_text_y, 0, mid_text);
 }

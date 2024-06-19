@@ -23,6 +23,8 @@
 #define LEFT_1 1
 #define RIGHT_1 4
 
+#define STAMINA_DECREASE 15
+
 #define UP_2 84
 #define DOWN_2 85
 #define LEFT_2 82
@@ -62,7 +64,7 @@ typedef struct {
 int draw_pause(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue);
 void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads);
 void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2);
-void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2);
+void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2, unsigned int stamina1, unsigned int stamina2);
 void draw_menu(ALLEGRO_FONT* font, int selected_option);
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option);
 int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue);

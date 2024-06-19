@@ -130,7 +130,8 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
 	new->y = y;	
     new->health = 1000;									
 	new->control = joystick_create();		
-    new->isBeingHit = 0;							
+    new->isBeingHit = 0;			
+    new->stamina = 100;				
 	return new;						
 }
 
@@ -172,6 +173,9 @@ void setHitbox(player *p) {
     }
 }
 
+void recharge_stamina(player *p) {
+    if (p->stamina < 100) p->stamina++;
+}
 
 void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {
     element->speed_y += GRAVITY*time;

@@ -74,7 +74,7 @@ typedef struct {
     int isJumping, isDown;  //implementar no codigo mudanca de altura, nao esta feita (isDown)
     int attack;
     int previous_movement;
-    unsigned int estamina; //implementar (parece simples)
+    int stamina; //implementar (parece simples)
     int direction;
     int isBeingHit;
     attack_box punch_box;
@@ -94,6 +94,7 @@ void update_position(player *player_1, player *player_2, float time);
 bool isInRange(player *attacker, player *defender, int attack);
 void resetAttributes(player **p, unsigned int width, unsigned int height, unsigned short x, unsigned short y);
 void printPlayerStatistics(player *p, int i);
+void recharge_stamina(player *p);
 
 size** characterSizes();
 void freeCharacterSizes(size** charSizes);
