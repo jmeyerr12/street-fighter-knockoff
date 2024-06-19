@@ -2,34 +2,76 @@
 
 #include "street_fighter.h"		
 
-unsigned char collision_2D(player *p1, player *p2) {
+void check_v_key_and_print_position(ALLEGRO_EVENT *ev, player* p1, player *p2) {
+    if (ev->type == ALLEGRO_EVENT_KEY_DOWN) {
+        if (ev->keyboard.keycode == ALLEGRO_KEY_V) { // Tecla 'V'
+            int x, y;
+            al_get_mouse_cursor_position(&x, &y);
+            char position[50];
+            snprintf(position, sizeof(position), "Cursor position: (%d, %d)", x, y);
+            printf("\n\n%s\n", position);
+            printPlayerStatistics(p1, 2);
+            printPlayerStatistics(p2, 2);
+            fflush(stdout);
+        }
+    }
+}
+
+unsigned char collision_players(player *p1, player *p2) {
     setHitbox(p1);
     setHitbox(p2);
 
-    int overlap_x = (p1->SE.x > p2->SW.x) &&  
-                    (p1->SW.x < p2->SE.x);   
+    int overlap_x = (p1->SE.x > p2->SW.x) && (p1->SW.x < p2->SE.x);
+    int overlap_y = (p1->SE.y > p2->NW.y) && (p1->NW.y < p2->SE.y);
 
-    int overlap_y = (p1->SE.y > p2->NW.y) && 
-                    (p1->NW.y < p2->SE.y);  
-
-    int overlap_wall = (p1->x <= 6) || (p1->SE.x >= X_SCREEN - 6);
-
-    return (overlap_x && overlap_y) || overlap_wall;
+    return overlap_x && overlap_y;
 }
 
-void try_move_player(player* p, player* other, int multiplier, int direction) {
+unsigned char collision_wall(player *p) {
+    return (p->x <= 6) || (p->SE.x >= X_SCREEN - 6);
+}
+
+unsigned char collision_2D(player *p1, player *p2) {
+    return collision_players(p1, p2) || collision_wall(p1) || collision_wall(p2);
+}
+
+void try_move_player(player *p, player *other, int multiplier, int direction) {
+    // Armazena a posição anterior antes de tentar mover
+    int original_x = p->x;
+
+    // Atualiza a posição do jogador
     movePlayer(p, multiplier, direction);
-    if (collision_2D(p, other)) {
-        movePlayer(p, -multiplier, direction);
+
+    // Se a nova posição resultar em uma colisão, reverta para a posição original
+    if (collision_players(p, other)) {
+        p->x = original_x;
+    }
+}
+
+void resolve_collision(player *p1, player *p2) {
+    if (p1->direction == LEFT) {
+        p1->x -= 2;
+        p2->x += 2;
+    } else {
+        p1->x += 2;
+        p2->x -= 2;
+    }
+}
+
+void out_of_bounds(player *p) {
+    if (p->x < 6) {
+        p->x = 6;  // Define a borda esquerda como limite mínimo
+    } else if (p->x > X_SCREEN - 6 - p->width) {
+        p->x = X_SCREEN - 6 - p->width;  // Define a borda direita menos a largura do sprite como limite máximo
     }
 }
 
 void update_position(player *player_1, player *player_2, float time) {
     if (player_1->control->up_right) {
-        try_move_player(player_1, player_2, 1, 5);
+        try_move_player(player_1, player_2, 2, 5);
     }
     if (player_1->control->up_left) {
-        try_move_player(player_1, player_2, 1, 4);
+        try_move_player(player_1, player_2, 2, 4);
     }
 
     if (player_1->control->left) {
@@ -44,18 +86,12 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_1->control->down) {
         try_move_player(player_1, player_2, 1, 3);
     }
-    if (collision_2D(player_1, player_2)) { // dar uma olhada depois, da pra melhorar
-        if (player_1->direction == LEFT)
-            player_1->x+=3;
-        else 
-            player_1->x-=3;
-    }
 
     if (player_2->control->up_right) {
-        try_move_player(player_2, player_1, 1, 5);
+        try_move_player(player_2, player_1, 2, 5);
     }
     if (player_2->control->up_left) {
-        try_move_player(player_2, player_1, 1, 4);
+        try_move_player(player_2, player_1, 2, 4);
     }
 
     if (player_2->control->left) {
@@ -70,12 +106,13 @@ void update_position(player *player_1, player *player_2, float time) {
     if (player_2->control->down) {
         try_move_player(player_2, player_1, 1, 3);
     }
-    if (collision_2D(player_1, player_2)) { // dar uma olhada depois, da pra melhorar
-        if (player_2->direction == LEFT)
-            player_2->x+=3;
-        else 
-            player_2->x-=3;
+
+    if (collision_players(player_1, player_2)) {
+        resolve_collision(player_1, player_2);
     }
+
+    out_of_bounds(player_1);
+    out_of_bounds(player_2);
 
     updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
@@ -460,12 +497,14 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
         if (pause_option == MENU) break;
 
-        if (timer_count % 120 == 0) { 
+
+        check_v_key_and_print_position(&event, player_1, player_2);
+        /* if (timer_count % 120 == 0) { 
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
             printPlayerStatistics(player_1, 1);
             printPlayerStatistics(player_2, 2);
-        }
+        }  */
     }
 
     al_destroy_timer(timer);

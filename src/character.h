@@ -12,8 +12,8 @@
 #include <allegro5/allegro_image.h>			
 
 #define STEP 2	
-#define GRAVITY 300
-#define INITIAL_JUMP_SPEED -240.0	
+#define GRAVITY 320
+#define INITIAL_JUMP_SPEED -280.0	
 
 #define ATTACK_PUNCH 1
 #define ATTACK_KICK 2
@@ -60,6 +60,10 @@ typedef struct {
 } coordinates;
 
 typedef struct {
+    coordinates SW, SE, NW, NE;
+} attack_box;
+
+typedef struct {
     unsigned int sprite;
     unsigned int width, height, originalHeight;
     unsigned int x, y;
@@ -73,6 +77,8 @@ typedef struct {
     unsigned int estamina; //implementar (parece simples)
     int direction;
     int isBeingHit;
+    attack_box punch_box;
+    attack_box kick_box;
 } player;
 
 typedef struct {

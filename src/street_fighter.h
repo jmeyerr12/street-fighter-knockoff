@@ -28,6 +28,9 @@
 #define LEFT_2 82
 #define RIGHT_2 83
 
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+
 #define NUM_FRAMES 8  
 
 #define MENU 0

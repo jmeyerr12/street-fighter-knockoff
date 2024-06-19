@@ -3,29 +3,6 @@
 bool isInRange(player *attacker, player *defender, int attack) {
     int attack_range;
 
-    switch (attack) {
-        case PUNCH:
-            attack_range = 30;  
-            break;
-        case KICK:
-            attack_range = 30;  
-            break;
-        case JUMPING_KICK:
-            attack_range = 30;  
-            break;
-        case JUMPING_PUNCH:
-            attack_range = 30;  
-            break;
-        case DOWN_KICK:
-            attack_range = 30;  
-            break;
-        case DOWN_PUNCH:
-            attack_range = 30;  
-            break;
-        default:
-            return false;  
-    }
-
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
     int attacker_top = attacker->NW.y;
@@ -36,16 +13,63 @@ bool isInRange(player *attacker, player *defender, int attack) {
     int defender_top = defender->NW.y;
     int defender_bottom = defender->SE.y;
 
-    bool horizontal_overlap = (attacker_right + attack_range >= defender_left) && (attacker_left - attack_range <= defender_right);
-    
-    bool vertical_overlap = ((attacker_bottom >= defender_bottom) && (attacker_top <= defender_top));
+    switch (attack) {
+        case PUNCH:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y;
+            attacker_bottom = attacker->SE.y - 60;
+            break;
+        case KICK:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y + 40;
+            attacker_bottom = attacker->SE.y;
+            break;
+        case JUMPING_KICK:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y;
+            attacker_bottom = attacker->SE.y + 60;
+            break;
+        case JUMPING_PUNCH:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y;
+            attacker_bottom = attacker->SE.y + 60;
+            break;
+        case DOWN_KICK:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y;
+            attacker_bottom = attacker->SE.y + 60;
+            break;
+        case DOWN_PUNCH:
+            attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : 30);
+            attacker_right = attacker->SE.x + (attacker->direction==LEFT ? 30 : 0);
+            attacker_top = attacker->NW.y;
+            attacker_bottom = attacker->SE.y + 60;
+            break;
+        default:
+            return false;  
+    }
+
+    bool horizontal_overlap = attacker->direction == LEFT ? 
+        (attacker_left <= defender_right && attacker_right >= defender_left) : 
+        (attacker_left <= defender_right && attacker_right >= defender_left);
+
+
+    bool vertical_overlap = !(defender_bottom < attacker_top || defender_top > attacker_bottom);
 
     /* printPlayerStatistics(attacker, 1);
-    //printf("attacker right: %d defender left: %d", attacker_right, defender_left);
-    printPlayerStatistics(defender, 2);
-    //printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
-    //printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom);
-    printf("Horizontal overlap: %d, Vertical overlap: %d\n", horizontal_overlap, vertical_overlap); */
+    printPlayerStatistics(defender, 2); 
+    printf("attacker left: %d defender right: %d\n", attacker_left, defender_right);
+    printf("attacker right: %d defender left: %d\n\n", attacker_right, defender_left); */
+
+/*     printf("Horizontal overlap: %d, Vertical overlap: %d\n", horizontal_overlap, vertical_overlap);  
+*/
+    printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
+    printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom); 
 
     return horizontal_overlap && vertical_overlap;
 }
@@ -54,8 +78,8 @@ bool isInRange(player *attacker, player *defender, int attack) {
 size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
     size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
         //IDLE     WALKING   PUNCHING  KICKING    DOWN     JUMP      JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
-        {{72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
-        {{60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90}},   // ken  -- DONE
+        {{72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 59}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 66}, {72, 85}, {72, 66}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
+        {{60, 90}, {60, 90}, {60, 90}, {60, 90}, {61, 59}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {61, 61}, {60, 90}, {61, 61}},   // ken  -- DONE
         {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}}, // zangief
         {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}}   // bison 
     };
@@ -137,13 +161,13 @@ void setHitbox(player *p) {
         p->NE.x = p->x + p->width;
         p->NE.y = py - p->height;
     } else { // direction == RIGHT
-        p->SW.x = p->x - p->width + SPRITE_WIDTH;
+        p->SW.x = p->x;
         p->SW.y = py;
-        p->SE.x = p->x + SPRITE_WIDTH;
+        p->SE.x = p->x + p->width;
         p->SE.y = py;
-        p->NW.x = p->x - p->width + SPRITE_WIDTH;
+        p->NW.x = p->x;
         p->NW.y = py - p->height;
-        p->NE.x = p->x + SPRITE_WIDTH;
+        p->NE.x = p->x + p->width;
         p->NE.y = py - p->height;
     }
 }
@@ -235,5 +259,5 @@ void printPlayerStatistics(player *p, int i) {
             p->SW.x, p->SW.y, p->SE.x, p->SE.y, p->NW.x, p->NW.y, p->NE.x, p->NE.y,
             0,0,0,0
             );
-    fflush(stdout);
+    //fflush(stdout);
 } 
