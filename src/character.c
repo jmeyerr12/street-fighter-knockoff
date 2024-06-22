@@ -1,10 +1,24 @@
 #include "character.h"
 
+void try_move_player(player *p, player *other, int multiplier, int direction) {
+    // Armazena a posição anterior antes de tentar mover
+    int original_x = p->x;
+
+    // Atualiza a posição do jogador
+    movePlayer(p, multiplier, direction);
+
+    // Se a nova posição resultar em uma colisão, reverta para a posição original
+    if (collision_players(p, other)) {
+        p->x = original_x;
+    }
+}
+
 bool isInRange(player *attacker, player *defender, int attack) {
+    //                 PNCH KCK JMPK JMPP DWNK DWNP
     int ranges[4][6] = {{30, 30, 30, 30, 30, 30}, //chun li
-    {30, 30, 30, 30, 30, 30}, //ken
-    {30, 30, 30, 30, 30, 30}, //zangief
-    {30, 30, 30, 30, 30, 30}}; //bison
+                        {30, 30, 30, 30, 30, 30}, //ken
+                        {30, 30, 30, 30, 30, 30}, //zangief
+                        {30, 30, 30, 30, 30, 30}}; //bison
 
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
@@ -61,25 +75,14 @@ bool isInRange(player *attacker, player *defender, int attack) {
         (attacker_left <= defender_right && attacker_right >= defender_left) : 
         (attacker_left <= defender_right && attacker_right >= defender_left);
 
-
     bool vertical_overlap = !(defender_bottom < attacker_top || defender_top > attacker_bottom);
-
-    /* printPlayerStatistics(attacker, 1);
-    printPlayerStatistics(defender, 2); 
-    printf("attacker left: %d defender right: %d\n", attacker_left, defender_right);
-    printf("attacker right: %d defender left: %d\n\n", attacker_right, defender_left); */
-
-/*     printf("Horizontal overlap: %d, Vertical overlap: %d\n", horizontal_overlap, vertical_overlap);  
-*/
-/*     printf("\nattacker_bottom: %d, defender_top: %d\n", attacker_bottom, defender_top);
-    printf("attacker_top: %d, defender_bottom: %d\n", attacker_top, defender_bottom);  */
 
     return horizontal_overlap && vertical_overlap;
 }
 
 
 size** characterSizes() {
-    // Tamanhos comuns para cada personagem
+    // Tamanhos comuns para cada personagem (idle)
     size commonSizes[4] = {
         {72, 85}, // chun li
         {60, 90}, // ken
@@ -286,19 +289,4 @@ void destroyPlayer(player *element){
 	free(element);						
 }
 
-void printPlayerStatistics(player *p, int i) {
-    printf("\n\n -- player %d -- \nisJumping: %d\nisDown: %d\nattack: %s\nheight: %d\nwidth: %d\nx: %d y: %d\nSW: (%d,%d) | SE: (%d,%d)\nNW: (%d,%d) | NE: (%d,%d)\npunching range: (%d, %d)\nkicking range: (%d, %d)", 
-            i, p->isJumping, p->isDown,
-            !p->attack ? "NOT ATTACKING" : (p->attack == ATTACK_KICK ? "KICKING" : 
-            (p->attack == ATTACK_PUNCH ? "PUNCHING" : 
-            ((p->attack == ATTACK_JUMPING_PUNCH) ? "JMP PUNCH" : 
-            ((p->attack == ATTACK_JUMPING_KICK) ? "JMP KICK" : 
-            ((p->attack == ATTACK_DOWN_KICK) ? "DWN KICK" : 
-            ((p->attack == ATTACK_DOWN_PUNCH) ? "DWN PUNCH" : "ERROR")))))),
-            p->height, p->width,
-            p->x, p->y, 
-            p->SW.x, p->SW.y, p->SE.x, p->SE.y, p->NW.x, p->NW.y, p->NE.x, p->NE.y,
-            0,0,0,0
-            );
-    //fflush(stdout);
-} 
+

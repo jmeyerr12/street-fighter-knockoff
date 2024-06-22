@@ -5,7 +5,9 @@ TARGET = street_fighter
 SRC_DIR = src
 
 # Arquivos fontes
-SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/character.c $(SRC_DIR)/joystick.c $(SRC_DIR)/street_fighter.c
+SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/character.c $(SRC_DIR)/joystick.c $(SRC_DIR)/street_fighter.c \
+       $(SRC_DIR)/input.c $(SRC_DIR)/collision.c $(SRC_DIR)/graphics.c $(SRC_DIR)/utils.c \
+       $(SRC_DIR)/game.c $(SRC_DIR)/background.c
 
 # Arquivos objeto (gerados a partir dos fontes)
 OBJS = $(patsubst $(SRC_DIR)/%.c, %.o, $(SRCS))

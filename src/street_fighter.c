@@ -1,371 +1,334 @@
 #include "street_fighter.h"
 
-int draw_pause(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
-    int selected_option = 1; 
-    bool done = false;
+//retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
+int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
+              ALLEGRO_FONT* font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
 
-    al_draw_filled_rectangle(X_SCREEN * 0.4, Y_SCREEN * 0.25, X_SCREEN * 0.6, Y_SCREEN * 0.6, al_map_rgb(0, 0, 0));
-
-    ALLEGRO_COLOR color_unselected = al_map_rgb(255, 255, 255);
-    ALLEGRO_COLOR color_selected = al_map_rgb(255, 255, 0);
-
-    al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
-                    X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Menu");
-    al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
-                    X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Resume");
-
-    al_flip_display();
-
-    while (!done) {
-        ALLEGRO_EVENT event;
-        al_wait_for_event(queue, &event);
-
-        // Processa eventos
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-            switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
-                case ALLEGRO_KEY_DOWN:
-                    selected_option = 1 - selected_option; // Alterna entre as opções
-                    break;
-                case ALLEGRO_KEY_ENTER:
-                    done = true; // Sai do loop ao pressionar ENTER
-                    break;
-                case ALLEGRO_KEY_ESCAPE:
-                    done = true; // Sai do loop ao pressionar ESCAPE
-                    break;
-            }
-
-            al_draw_filled_rectangle(X_SCREEN * 0.4, Y_SCREEN * 0.25, X_SCREEN * 0.6, Y_SCREEN * 0.6, al_map_rgb(0, 0, 0));
-
-            al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
-                         X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Menu");
-            al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
-                         X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Resume");
-
-            al_flip_display();
-        }
-    }
-
-    return selected_option == 0 ? MENU : GAME; // Retorna a opção selecionada
-}
-
-void draw_character_selection(ALLEGRO_BITMAP* sprite_sheet, int sprite_index, int x, int y, int sprite_dimension, ALLEGRO_COLOR color) { 
-    int border_thickness = 2; 
-    al_draw_rectangle(x, y, x + sprite_dimension, y + sprite_dimension, color, border_thickness);
-    al_draw_bitmap_region(sprite_sheet, sprite_index * sprite_dimension, 0, sprite_dimension, sprite_dimension, 
-                          x, y, 0);
-}
-
-void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads) { 
-    al_clear_to_color(al_map_rgb(0, 0, 0));
-    ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255); //blue
-    ALLEGRO_COLOR red = al_map_rgb(255, 0, 0); //red
-    ALLEGRO_COLOR white = al_map_rgb(255, 255, 255); //white
-
-    int start_x = (X_SCREEN - (2 * 32 + 10)) / 2; 
-    int start_y = (Y_SCREEN - (2 * 32 + 10)) / 2 - 50; 
-    int sprite_dimensions = 32;
-
-
-    al_draw_bitmap_region(heads, 0, 32 + selected_option1 * 16, 96, 16, 
-                        X_SCREEN/4, Y_SCREEN/2, 0);
-    al_draw_bitmap_region(heads, selected_option1*112, 96, 112, 112, 
-                        X_SCREEN/4, Y_SCREEN-115, 0);
-
-    al_draw_bitmap_region(heads, 0, 32 + selected_option2 * 16, 96, 16, 
-                        (X_SCREEN*3)/5, Y_SCREEN/2, 0);
-    al_draw_bitmap_region(heads, selected_option2*112, 96, 112, 112, 
-                        (X_SCREEN*1)/2, Y_SCREEN-115, ALLEGRO_FLIP_HORIZONTAL);
-
-    draw_character_selection(heads, 0, start_x, start_y, sprite_dimensions, selected_option1==0? blue : (selected_option2==0? red : white));
-    draw_character_selection(heads, 1, start_x + sprite_dimensions, start_y, sprite_dimensions, selected_option1==1? blue : (selected_option2==1? red : white));
-    draw_character_selection(heads, 2, start_x, start_y + sprite_dimensions+3, sprite_dimensions, selected_option1==2? blue : (selected_option2==2? red : white));
-    draw_character_selection(heads, 3, start_x + sprite_dimensions, start_y + sprite_dimensions+3, sprite_dimensions, selected_option1==3? blue : (selected_option2==3? red : white));
-    al_flip_display();
-}
-
-void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2) {
-    *selected_option1 = 0;
-    *selected_option2 = 1;
-
+    size** charSizes = characterSizes();
+    setDimensions(player_1, charSizes[player_1->sprite][IDLE].width, charSizes[player_1->sprite][IDLE].height);
+    setDimensions(player_2, charSizes[player_2->sprite][IDLE].width, charSizes[player_2->sprite][IDLE].height);
+    
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
-    ALLEGRO_BITMAP* heads = al_load_bitmap("./assets/characters/heads.png");
 
-    bool done1, done2 = false;
+    double lastTime = al_get_time();
+    int running = 1;
+    int frame1 = 0, frame2 = 0;
+    int timer_count = 0;
+    int maxFrame1 = 5, maxFrame2 = 5;
+    int movement1 = 0, previous_movement1 = 0;
+    int movement2 = 0, previous_movement2 = 0;
+    int alreadyDamaged1 = 0, alreadyDamaged2 = 0;
+    background bg;
+    int countdown = 99;
+    int isFim = 3; 
+    int pause_option = GAME;
+    init_animated_background(&bg, 24.0, filename);  
 
-    while (!(done1 && done2)) {
-        ALLEGRO_EVENT event;
-        al_wait_for_event(queue, &event);
-        draw_characters_menu(*selected_option1, *selected_option2, heads);  
-        al_clear_to_color(al_map_rgb(0, 0, 0));
-        
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-            switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
-                    if (!done2) {
-                        if (*selected_option2 == 3 && *selected_option1 != 1) *selected_option2 = 1;
-                        else if (*selected_option2 == 2 && *selected_option1 != 0) *selected_option2 = 0;
-                    }
-                    break;
-                case ALLEGRO_KEY_DOWN:
-                    if (!done2) {
-                        if (*selected_option2 == 1 && *selected_option1 != 3) *selected_option2 = 3;
-                        else if (*selected_option2 == 0 && *selected_option1 != 2) *selected_option2 = 2;
-                    }
-                    break;
-                case ALLEGRO_KEY_LEFT:
-                    if (!done2) {
-                        if (*selected_option2 == 1 && *selected_option1 != 0) *selected_option2 = 0;
-                        else if (*selected_option2 == 3 && *selected_option1 != 2) *selected_option2 = 2;
-                    }
-                    break;
-                case ALLEGRO_KEY_RIGHT:
-                    if (!done2) {
-                        if (*selected_option2 == 0 && *selected_option1 != 1) *selected_option2 = 1;
-                        else if (*selected_option2 == 2 && *selected_option1 != 3) *selected_option2 = 3;
-                    }
-                    break;
-                case ALLEGRO_KEY_W:
-                    if (!done1) {
-                        if (*selected_option1 == 3 && *selected_option2 != 1) *selected_option1 = 1;
-                        else if (*selected_option1 == 2 && *selected_option2 != 0) *selected_option1 = 0;
-                    }
-                    break;
-                case ALLEGRO_KEY_S:
-                    if (!done1) {
-                        if (*selected_option1 == 1 && *selected_option2 != 3) *selected_option1 = 3;
-                        else if (*selected_option1 == 0 && *selected_option2 != 2) *selected_option1 = 2;
-                    }
-                    break;
-                case ALLEGRO_KEY_A:
-                    if (!done1) {
-                        if (*selected_option1 == 1 && *selected_option2 != 0) *selected_option1 = 0;
-                        else if (*selected_option1 == 3 && *selected_option2 != 2) *selected_option1 = 2;
-                    }
-                    break;
-                case ALLEGRO_KEY_D:
-                    if (!done1) {
-                        if (*selected_option1 == 0 && *selected_option2 != 1) *selected_option1 = 1;
-                        else if (*selected_option1 == 2 && *selected_option2 != 3) *selected_option1 = 3;
-                    }
-                    break;
-                case ALLEGRO_KEY_ENTER:
-                    done2 = true; 
-                    break;
-                case ALLEGRO_KEY_SPACE:
-                    done1 = true; 
-                    break;
-            }
-        }
+    update_animated_background(&bg);
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    draw_animated_background(&bg);
+
+    if (player_1->x > player_2->x) {
+        draw_player(player1_sheet, player_1, frame1, movement1, 1);
+        draw_player(player2_sheet, player_2, frame2, movement2, 0);
+    } else {
+        draw_player(player1_sheet, player_1, frame1, movement1, 0);
+        draw_player(player2_sheet, player_2, frame2, movement2, 1);
     }
+    draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins, player_1->stamina, player_2->stamina);   
 
-    if (*selected_option1 == 0) *player1_sheet = al_load_bitmap("./assets/characters/chun_li.png");
-    else if (*selected_option1 == 1) *player1_sheet = al_load_bitmap("./assets/characters/ken.png");
-    else if (*selected_option1 == 2) *player1_sheet = al_load_bitmap("./assets/characters/zangief.png");
-    else if (*selected_option1 == 3) *player1_sheet = al_load_bitmap("./assets/characters/bison.png");
+    char roundText[100];
+    if (round == 1) strcpy(roundText, "1ST ROUND");
+    else if (round == 2) strcpy(roundText, "2ND ROUND");
+    else strcpy(roundText, "3RD ROUND");
 
-    if (*selected_option2 == 0) *player2_sheet = al_load_bitmap("./assets/characters/chun_li.png");
-    else if (*selected_option2 == 1) *player2_sheet = al_load_bitmap("./assets/characters/ken.png");
-    else if (*selected_option2 == 2) *player2_sheet = al_load_bitmap("./assets/characters/zangief.png");
-    else if (*selected_option2 == 3) *player2_sheet = al_load_bitmap("./assets/characters/bison.png");
+    al_draw_filled_rectangle(X_SCREEN / 2 - 40, Y_SCREEN / 2 - 4, X_SCREEN / 2 + 40, Y_SCREEN / 2 + 10, al_map_rgb(0, 0, 0));
 
-    draw_characters_menu(*selected_option1, *selected_option2, heads);  
+    al_draw_text(font, al_map_rgb(255, 255, 0),
+                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, roundText);
+
+    al_flip_display();
     al_rest(1.5); 
 
-    al_destroy_bitmap(heads); 
-    al_destroy_timer(timer);   
-}
+    int pausedTime = 0;
+    while (true) {
+        ALLEGRO_EVENT event;
+        al_wait_for_event(queue, &event);
 
-void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2, unsigned int stamina1, unsigned int stamina2) {
-    int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
-    int norma_size2=((x/2)+((score2*100)/x));
+        ALLEGRO_KEYBOARD_STATE key_state;
+        al_get_keyboard_state(&key_state);
 
-    char mid_text[100];
-    sprintf(mid_text, "%d", countdown);
-    int mid_text_x = x / 2 - al_get_text_width(font, mid_text) / 2;
-    int mid_text_y = 30; 
-    
-    char score1_text[100], score2_text[100];
-    sprintf(score1_text, "%d", score1 >= 0 ? score1 : 0);
-    sprintf(score2_text, "%d", score2 >= 0 ? score2 : 0);
-
-    char round_atual[100];
-    sprintf(round_atual, "Round %d", round);
-
-    char points[100];
-    sprintf(points, "%d x %d", points1, points2);
-    
-    al_draw_text(font, al_map_rgb(255, 0, 0), norma_size1 - 50, 15, 0, score1_text);
-    al_draw_text(font, al_map_rgb(0, 0, 255), norma_size2 + 20, 15, 0, score2_text);
-
-    al_draw_text(font, al_map_rgb(255, 255, 0), x/2-100000/x, mid_text_y, 0, round_atual);
-    al_draw_text(font, al_map_rgb(255, 255, 0), x/2+75000/x, mid_text_y, 0, points);
-    
-    //vida
-    al_draw_filled_rectangle(norma_size1, 10,
-                             x/2, 25, al_map_rgb(255, 0, 0));
-    al_draw_filled_rectangle(norma_size2, 10,
-                             x/2, 25, al_map_rgb(0, 0, 255));
-
-    //stamina
-
-    al_draw_filled_rectangle(x/2-100000/x, 3,
-                              x/2-100000/x + 100, 7, al_map_rgb(255, 255, 255));
-    al_draw_filled_rectangle(x/2+100000/x - 100, 3,
-                              x/2+100000/x, 7, al_map_rgb(255, 255, 255));
-
-    al_draw_filled_rectangle(x/2-100000/x, 4,
-                              x/2-100000/x + stamina1, 6, al_map_rgb(255, 255, 0));
-    al_draw_filled_rectangle(x/2+100000/x - stamina2, 4,
-                              x/2+100000/x, 6, al_map_rgb(255, 255, 0));
-
-    al_draw_text(font, al_map_rgb(255, 255, 0), mid_text_x, mid_text_y, 0, mid_text);
-}
-
-void init_animated_background(background* bg, float frame_rate, char *folder) {
-    bg->current_frame = 0;
-    bg->frame_duration = 1.0 / frame_rate;
-    bg->last_frame_update_time = 0;
-    for (int i = 0; i < NUM_FRAMES; i++) {
-        char filename[500];
-        snprintf(filename, sizeof(filename), "./assets/background/%s/019-l6Xgvsw-%d.png", folder, i);
-        bg->frames[i] = al_load_bitmap(filename);
-        if (!bg->frames[i]) {
-            fprintf(stderr, "Failed to load frame %d. - IMAGE %s\n", i, filename);
-            exit(-1);
-        }
-    }
-}
-
-void update_animated_background(background* bg) {
-    double now = al_get_time();
-    if (now - bg->last_frame_update_time >= bg->frame_duration) {
-        bg->current_frame = (bg->current_frame + 1) % NUM_FRAMES;
-        bg->last_frame_update_time = now;
-    }
-}
-
-void draw_animated_background(const background* bg) {
-    int original_width = al_get_bitmap_width(bg->frames[bg->current_frame]);
-    int original_height = al_get_bitmap_height(bg->frames[bg->current_frame]);
-
-    al_draw_scaled_bitmap(bg->frames[bg->current_frame], 
-                          0, 0, 
-                          original_width, original_height,
-                          0, 0,
-                          X_SCREEN, Y_SCREEN, 
-                          0); 
-}
-
-void destroy_animated_background(background* bg) {
-    if (bg && bg->frames) {
-        for (int i = 0; i < NUM_FRAMES; i++) {
-            if (bg->frames[i]) {
-                al_destroy_bitmap(bg->frames[i]);
-                bg->frames[i] = NULL;
+        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+            running = !running;
+            if (running) {
+                lastTime = al_get_time() - pausedTime; //adjust the timer when resuming
+            } else {
+                pausedTime = al_get_time() - lastTime; //record the time when pausing
             }
         }
+
+        if (running) {
+            if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                *state = EXIT;
+                break;
+            }
+
+            isFim = verificaFim(player_1, player_2, countdown);
+            if (isFim != 3) break;
+
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                timer_count++;
+
+                double currentTime = al_get_time();
+                float deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+
+                update_animated_background(&bg);
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                draw_animated_background(&bg);
+
+                handle_input(&key_state, player_1, player_2, &movement1, &movement2);
+                
+                handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
+                handle_jump(player_1, player_2, &movement1);
+                handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
+
+                //printf("isDefending1: %d\n", player_1->isDefending);
+                if (player_1->isDefending == 1) movement1 = DEFENDING;
+                else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
+                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+
+                if (movement1 != previous_movement1) frame1 = 0;
+                maxFrame1 = countFrames(movement1);
+                previous_movement1 = movement1;
+
+                defense(player_1, movement1, &frame1, maxFrame1);
+                being_hit(player_1, movement1, &frame1, maxFrame1);
+
+                handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
+                handle_jump(player_2, player_1, &movement2);
+                handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
+
+                if (player_2->isDefending == 1) movement2 = DEFENDING;
+                else if (player_2->isDefending == 2) movement2 = DEFENDING_DOWN;
+                else if (movement2 == DEFENDING_DOWN) movement2 = GET_DOWN; 
+
+                if (movement2 != previous_movement2) frame2 = 0;
+                maxFrame2 = countFrames(movement2);
+                previous_movement2 = movement2;
+                defense(player_2, movement2, &frame2, maxFrame2);
+                being_hit(player_2, movement2, &frame2, maxFrame2);
+
+                if (timer_count % 4 == 0) {
+                    recharge_stamina(player_1);
+                    recharge_stamina(player_2);
+                }
+                
+                update_position(player_1, player_2, deltaTime);
+
+                if ((player_1->SE.x + player_1->SW.x)/2 > (player_2->SE.x + player_2->SW.x)/2) {
+                    player_1->direction = RIGHT;
+                    player_2->direction = LEFT;
+                    draw_player(player1_sheet, player_1, frame1, movement1, 1);
+                    draw_player(player2_sheet, player_2, frame2, movement2, 0);
+                } else {
+                    player_1->direction = LEFT;
+                    player_2->direction = RIGHT;
+                    draw_player(player1_sheet, player_1, frame1, movement1, 0);
+                    draw_player(player2_sheet, player_2, frame2, movement2, 1);
+                }
+
+                draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins, player_1->stamina, player_2->stamina);
+                if (timer_count % 30 == 0) countdown--;
+
+                resetPlayer(player_1);
+                resetPlayer(player_2);
+
+                updateDimensions(player_1, charSizes, movement1);
+                updateDimensions(player_2, charSizes, movement2);
+                
+                al_flip_display();
+            }
+        } else {
+            pause_option = draw_pause(font, queue);
+            running = 1;
+            lastTime = al_get_time() - pausedTime; // Reset the timer when resuming
+        }
+
+        if (pause_option == MENU) break;
+
+
+        check_v_key_and_print_position(&event, player_1, player_2);
+        /* if (timer_count % 120 == 0) { 
+            printf("\n\n -- %d -- ", timer_count / 30);
+            printf("\n---------- %f", al_get_time());
+            printPlayerStatistics(player_1, 1);
+            printPlayerStatistics(player_2, 2);
+        }  */
     }
+
+    al_destroy_timer(timer);
+    destroy_animated_background(&bg);
+    freeCharacterSizes(charSizes);
+
+    return isFim;
 }
 
-int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
-    int selected_option = 0; // 0 para "Destroyed Dojo", 1 para "Dark Dojo"
-    bool done = false;
-        
+// Retorna 0 em caso de empate, 1 em caso de vitória do player 1 e 2 em caso de vitória do player 2
+int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
+    ALLEGRO_FONT *font, ALLEGRO_BITMAP* player1_sheet, ALLEGRO_BITMAP* player2_sheet, int round, int p1Wins, int p2Wins) {
+
+    size** charSizes = characterSizes();
+    setDimensions(player_1, charSizes[player_1->sprite][IDLE].width, charSizes[player_1->sprite][IDLE].height);
+    setDimensions(player_2, charSizes[player_2->sprite][IDLE].width, charSizes[player_2->sprite][IDLE].height);
+    
     ALLEGRO_TIMER* timer = al_create_timer(1.0 / 30.0);
     al_register_event_source(queue, al_get_timer_event_source(timer));
     al_start_timer(timer);
 
-    // Array de backgrounds
-    background bg[2];
-    init_animated_background(&bg[0], 24,"destroyed_dojo");
-    init_animated_background(&bg[1], 24,"dark_dojo");
+    double lastTime = al_get_time();
+    double pausedTime = 0;
+    int running = 1;
+    int frame1 = 0, frame2 = 0;
+    int timer_count = 0;
+    int maxFrame1 = 5, maxFrame2 = 5;
+    int movement1 = 0, previous_movement1 = 0;
+    int movement2 = 0, previous_movement2 = 0;
+    int alreadyDamaged1 = 0, alreadyDamaged2 = 0;
+    background bg;
+    int countdown = 99;
+    int isFim = 3; 
+    init_animated_background(&bg, 24.0, filename);  
 
-    while (!done) {
+    update_animated_background(&bg);
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    draw_animated_background(&bg);
+    if (player_1->x > player_2->x){
+        draw_player(player1_sheet, player_1, frame1, movement1, 1);
+        draw_player(player2_sheet, player_2, frame2, movement2, 0);
+    } else {
+        draw_player(player1_sheet, player_1, frame1, movement1, 0);
+        draw_player(player2_sheet, player_2, frame2, movement2, 1);
+    }
+    setHitbox(player_1);
+    setHitbox(player_2);
+    draw_scoreboard(player_1->health,player_2->health,X_SCREEN,font,countdown,round,p1Wins,p2Wins, player_1->stamina, player_2->stamina);   
+
+    char roundText[100];
+    if (round == 1) strcpy(roundText, "1ST ROUND");
+    else if (round == 2) strcpy(roundText, "2ND ROUND");
+    else strcpy(roundText, "3RD ROUND");
+
+    al_draw_filled_rectangle(X_SCREEN/2 - 40, Y_SCREEN/2 - 4, X_SCREEN/2 + 40, Y_SCREEN/2 + 10, al_map_rgb(0, 0, 0));
+    al_draw_text(font, al_map_rgb(255, 255, 0), X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, roundText);
+    al_flip_display();
+    al_rest(1.5); 
+
+    while (true) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
 
-        update_animated_background(&bg[selected_option]);  // Atualiza a animação do background atual
-        al_clear_to_color(al_map_rgb(0, 0, 0));
-        draw_img_menu(font, selected_option, &bg[selected_option]);  // Desenha o menu com a animação
+        ALLEGRO_KEYBOARD_STATE key_state;
+        al_get_keyboard_state(&key_state);
         
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-            switch (event.keyboard.keycode) {
-                case ALLEGRO_KEY_UP:
-                case ALLEGRO_KEY_DOWN:
-                    selected_option = 1 - selected_option; // Toggle entre as opções
-                    break;
-                case ALLEGRO_KEY_ENTER:
-                    done = true; // Saída do loop ao pressionar ENTER
-                    break;
-                case ALLEGRO_KEY_ESCAPE:
-                    done = true; // Saída do loop ao pressionar ESCAPE
-                    break;
+        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+            running = !running;
+            if (running) {
+                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
+            } else {
+                pausedTime = al_get_time() - lastTime; // record the time when pausing
+                int pause_option = draw_pause(font, queue);
+                if (pause_option == MENU) break;
+                running = 1;
+                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
             }
         }
-    }
 
-    // Limpeza dos backgrounds
-    for (int i = 0; i < 2; i++) {
-        destroy_animated_background(&bg[i]);
-    }
-
-    return selected_option; // Retorna a opção selecionada
-}
-
-void draw_img_menu(ALLEGRO_FONT* font, int selected_option, background* bg) {
-    update_animated_background(bg); // Atualiza a animação do background
-    al_clear_to_color(al_map_rgb(0, 0, 0)); // Limpa a tela
-    draw_animated_background(bg); // Desenha o background animado
-
-    ALLEGRO_COLOR color_unselected = al_map_rgb(255, 255, 255);
-    ALLEGRO_COLOR color_selected = al_map_rgb(255, 255, 0);
-
-    al_draw_text(font, selected_option == 0 ? color_selected : color_unselected,
-                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Destroyed Dojo");
-    al_draw_text(font, selected_option == 1 ? color_selected : color_unselected,
-                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Dark Dojo");
-
-    al_flip_display();
-}
-
-void draw_menu(ALLEGRO_FONT* font, int selected_option) {
-    al_clear_to_color(al_map_rgb(0, 0, 0));  // Limpa a tela com preto
-
-    ALLEGRO_COLOR normal_color = al_map_rgb(255, 255, 255);
-    ALLEGRO_COLOR selected_color = al_map_rgb(255, 255, 0);
-
-    al_draw_text(font, selected_option == MENU_START ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Multiplayer");
-
-    al_draw_text(font, selected_option == MENU_SINGLE_PLAYER ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Single Player");
-
-    al_draw_text(font, selected_option == MENU_EXIT ? selected_color : normal_color,
-                 X_SCREEN / 2, 2 * Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Exit Game");
-
-    al_flip_display();
-}
-
-int handle_menu_input(ALLEGRO_EVENT event, int* selected_option) {
-    if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
-        switch (event.keyboard.keycode) {
-            case UP_2:
-                *selected_option = (*selected_option == MENU_START) ? MENU_EXIT : (*selected_option - 1);
+        if (running) {
+            if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+                *state = EXIT;
                 break;
-            case DOWN_2:
-                *selected_option = (*selected_option == MENU_EXIT) ? MENU_START : (*selected_option + 1);
-                break;
-            case ALLEGRO_KEY_ENTER:
-                if (*selected_option == MENU_START) return GAME;
-                if (*selected_option == MENU_SINGLE_PLAYER) return SINGLE_PLAYER;
-                if (*selected_option == MENU_EXIT) return EXIT;
-                break;
-            case ALLEGRO_KEY_ESCAPE:
-                return EXIT;
+            }
+
+            isFim = verificaFim(player_1, player_2, countdown);
+            if (isFim != 3) break;
+
+            if (event.type == ALLEGRO_EVENT_TIMER) {
+                timer_count++;
+
+                double currentTime = al_get_time();
+                float deltaTime = currentTime - lastTime;
+                lastTime = currentTime;
+
+                update_animated_background(&bg);
+                al_clear_to_color(al_map_rgb(0, 0, 0));
+                draw_animated_background(&bg);
+
+                const int player1_keys[] = {ALLEGRO_KEY_W, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_S, ALLEGRO_KEY_R, ALLEGRO_KEY_F};
+                handle_player_input(&key_state, player_1, player1_keys, &movement1);
+
+                handle_bot_input(player_1, player_2, &movement2);
+                
+                handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
+                handle_jump(player_1, player_2, &movement1);
+                handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
+                if (movement1 != previous_movement1) frame1 = 0;
+                maxFrame1 = countFrames(movement1);
+                previous_movement1 = movement1;
+                being_hit(player_1, movement1, &frame1, maxFrame1);
+
+                handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
+                handle_jump(player_2, player_1, &movement2);
+                handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
+                if (movement2 != previous_movement2) frame2 = 0;
+                maxFrame2 = countFrames(movement2);
+                previous_movement2 = movement2;
+                being_hit(player_1, movement1, &frame1, maxFrame1);
+
+                if (timer_count % 4 == 0) {
+                    recharge_stamina(player_1);
+                    recharge_stamina(player_2);
+                }
+
+                update_position(player_1, player_2, deltaTime);
+
+                if (player_1->SE.x > player_2->SW.x) {
+                    player_1->direction = RIGHT;
+                    player_2->direction = LEFT;
+                    draw_player(player1_sheet, player_1, frame1, movement1, 1);
+                    draw_player(player2_sheet, player_2, frame2, movement2, 0);
+                } else {
+                    player_1->direction = LEFT;
+                    player_2->direction = RIGHT;
+                    draw_player(player1_sheet, player_1, frame1, movement1, 0);
+                    draw_player(player2_sheet, player_2, frame2, movement2, 1);
+                }
+
+                draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins, player_1->stamina, player_2->stamina);
+                if (timer_count % 30 == 0) countdown--;
+
+                resetPlayer(player_1);
+                resetPlayer(player_2);
+
+                updateDimensions(player_1, charSizes, movement1);
+                updateDimensions(player_2, charSizes, movement2);
+                
+                al_flip_display();
+            }
+        }
+
+        if (timer_count % 120 == 0) { 
+            printf("\n\n -- %d -- ", timer_count / 30);
+            printf("\n---------- %f", al_get_time());
+            printPlayerStatistics(player_1, 1);
+            printPlayerStatistics(player_2, 2);
         }
     }
-    return MENU;
+
+    al_destroy_timer(timer);
+    destroy_animated_background(&bg);
+    freeCharacterSizes(charSizes);
+    return isFim;
 }
