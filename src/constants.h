@@ -1,6 +1,10 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+/* 
+    Biblioteca que agrega as constantes utilizadas
+*/
+
 // Tamanho da tela
 #define X_SCREEN 600								
 #define Y_SCREEN 300	

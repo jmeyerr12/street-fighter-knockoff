@@ -1,7 +1,11 @@
 #ifndef PLAYER_TYPE_H
 #define PLAYER_TYPE_H
 
-// Definição dos estados do jogador
+/*
+    Biblioteca com o tipo "player", os tipos utilizados por "player" e o tipo player_state, referente aos estados do bot no single player 
+*/
+
+// Definição dos estados do bot
 typedef enum {
     STATE_NORMAL,
     STATE_DEFENSIVE,
