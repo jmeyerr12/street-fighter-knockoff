@@ -1,6 +1,10 @@
 #ifndef COLLISION_H
 #define COLLISION_H
 
+/*
+    Biblioteca com funcões responsáveis por detectar, impedir e resolver colisões entre players e com as bordas do display
+*/
+
 #include "character.h"
 #include "constants.h"
 #include "player_type.h"
