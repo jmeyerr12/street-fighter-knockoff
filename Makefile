@@ -11,13 +11,17 @@ SRCS = $(SRC_DIR)/main.c $(SRC_DIR)/character.c $(SRC_DIR)/joystick.c $(SRC_DIR)
 OBJS = $(patsubst $(SRC_DIR)/%.c, %.o, $(SRCS))
 
 # Flags padrão de compilação
-CFLAGS = -Wall -Wextra -std=c11
+CFLAGS = -Wall -Wextra
 
 # Flags e bibliotecas do Allegro
 ALLEGRO_FLAGS = $(shell pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags)
 
 # Compilador
 CC = gcc
+
+# Nome do arquivo de entrega
+LOGIN = jmm23
+ENTREGA = $(LOGIN)-A4.tar.gz
 
 # Regra padrão: compilar tudo
 all: $(TARGET)
@@ -30,15 +34,18 @@ $(TARGET): $(OBJS)
 %.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c -o $@ $< $(ALLEGRO_FLAGS)
 
-# Limpar os arquivos objeto
+# Limpar os arquivos objeto e o arquivo de entrega
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS) $(ENTREGA)
 	find $(SRC_DIR) ! -name '*.c' ! -name '*.h' -type f -exec rm -f {} +
 
 # Limpar tudo, incluindo o executável
 purge: clean
 	rm -f $(TARGET)
 
-# Regra para forçar a recompilação
-.PHONY: all clean purge
+# Criar o arquivo de entrega
+entrega: purge
+	tar -czvf $(ENTREGA) Makefile $(SRC_DIR)
 
+# Regra para forçar a recompilação
+.PHONY: all clean purge entrega
