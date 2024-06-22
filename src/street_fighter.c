@@ -260,8 +260,13 @@ void draw_animated_background(const background* bg) {
 }
 
 void destroy_animated_background(background* bg) {
-    for (int i = 0; i < NUM_FRAMES; i++) {
-        al_destroy_bitmap(bg->frames[i]);
+    if (bg && bg->frames) {
+        for (int i = 0; i < NUM_FRAMES; i++) {
+            if (bg->frames[i]) {
+                al_destroy_bitmap(bg->frames[i]);
+                bg->frames[i] = NULL;
+            }
+        }
     }
 }
 

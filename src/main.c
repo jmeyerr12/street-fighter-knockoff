@@ -155,8 +155,13 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
                 *movement = DOWN_KICK;
                 p->attack = ATTACK_DOWN_KICK;
                 p->stamina-=STAMINA_DECREASE;
+            } else if (al_key_down(key_state, keys[1])) {
+                joystick_down_left(p->control);
+            } else if (al_key_down(key_state, keys[2])) {
+                joystick_down_right(p->control);
             } else {
                 *movement = GET_DOWN;
+                joystick_down(p->control);
             }
             p->isDown = 1;
         } else if (al_key_down(key_state, keys[4]) && p->attack == 0) { // PUNCH
@@ -192,14 +197,13 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
         } else *movement = IDLE;
         if (p->stamina < 0) p->stamina = 0;
     } else {
-        printf("isDown: %d\nisJumping: %d\n\n", p->isDown, p->isJumping);
         if (p->isDown || p->isBeingHit == 2) {
             p->isBeingHit = 2;
             *movement = DAMAGED_DOWN;
         } else if (p->isJumping || p->isBeingHit == 3) {
             p->isBeingHit = 3;
             *movement = DAMAGED_JMP;
-        } else *movement = DAMAGED; //arrumar esse trecho, jump e down nao funcionam
+        } else if (p->isBeingHit == 1) *movement = DAMAGED; //arrumar esse trecho, jump e down nao funcionam
         p->speed_x = p->direction ? 1 : -1;
     }
 } 
@@ -261,6 +265,12 @@ int countFrames(int movement) {
         case DAMAGED_DOWN:
             return 3;
             break;
+        case DEFENDING:
+            return 2;
+            break;
+        case DEFENDING_DOWN:
+            return 2;
+            break;
         default:
             return -100;
             break;
@@ -310,6 +320,10 @@ void being_hit(player *p, int mv, int *frame, int maxFrames) {
     if (*frame == maxFrames && (mv == DAMAGED || mv == DAMAGED_DOWN || mv == DAMAGED_JMP)) p->isBeingHit = 0;
 }
 
+void defense(player *p, int mv, int *frame, int maxFrames) {
+    if (*frame == maxFrames && (mv == DEFENDING || mv == DEFENDING_DOWN)) {p->isDefending = 0;}
+}
+
 void handle_jump(player *p, player *opponent, int *movement) {
     if (p->attack == 0 && p->isBeingHit == 0) {
         if (p->isJumping == 1) (*movement) = JUMP;
@@ -323,53 +337,57 @@ void handle_jump(player *p, player *opponent, int *movement) {
     }
 }
 
-void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamaged) {
-    if (p->stamina - STAMINA_DECREASE >= 0) { 
-        if (p->attack == ATTACK_KICK) {
-            *movement = KICK;
-            if (isInRange(p, opponent, KICK) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
+void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attackType) {
+    if (isInRange(p, opponent, attackType) && !(*alreadyDamaged)) {
+        *alreadyDamaged = 1;
+        if ((opponent->direction == LEFT && !(opponent->control->left || opponent->control->down_left)) ||
+            (opponent->direction == RIGHT && !(opponent->control->right || opponent->control->down_right))) {
+            opponent->health -= damage;
+            opponent->isBeingHit = 1;
+        } else {
+            if (opponent->direction == LEFT) {
+                opponent->isDefending = opponent->control->left ? 1 : 2; // 1 para defendendo em pé, 2 para agachado
+            } else {
+                opponent->isDefending = opponent->control->right ? 1 : 2; 
             }
-        } else if (p->attack == ATTACK_PUNCH) {
-            *movement = PUNCH;
-            if (isInRange(p, opponent, PUNCH) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
-            }
-        } else if (p->attack == ATTACK_JUMPING_KICK) {
-            *movement = JUMPING_KICK;
-            if (isInRange(p, opponent, JUMPING_KICK) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
-            }
-        } else if (p->attack == ATTACK_DOWN_PUNCH) {
-            *movement = DOWN_PUNCH;
-            if (isInRange(p, opponent, DOWN_PUNCH) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
-            }
-        } else if (p->attack == ATTACK_DOWN_KICK) {
-            *movement = DOWN_KICK;
-            if (isInRange(p, opponent, DOWN_KICK) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
-            }
-        } else if (p->attack == ATTACK_JUMPING_PUNCH) {
-            *movement = JUMPING_PUNCH;
-            if (isInRange(p, opponent, JUMPING_PUNCH) && !(*alreadyDamaged)) {
-                *alreadyDamaged = 1;
-                opponent->health -= 30; // implementar sprite de sofrendo ataque!!
-                opponent->isBeingHit = 1;
-            }
-        } else *alreadyDamaged = 0;
+        }
     }
 }
+
+void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamaged) {
+    if (p->stamina - STAMINA_DECREASE >= 0) {
+        switch (p->attack) {
+            case ATTACK_KICK:
+                *movement = KICK;
+                check_and_apply_damage(p, opponent, 30, alreadyDamaged, KICK);
+                break;
+            case ATTACK_PUNCH:
+                *movement = PUNCH;
+                check_and_apply_damage(p, opponent, 20, alreadyDamaged, PUNCH);
+                break;
+            case ATTACK_JUMPING_KICK:
+                *movement = JUMPING_KICK;
+                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_KICK);
+                break;
+            case ATTACK_DOWN_PUNCH:
+                *movement = DOWN_PUNCH;
+                check_and_apply_damage(p, opponent, 25, alreadyDamaged, DOWN_PUNCH);
+                break;
+            case ATTACK_DOWN_KICK:
+                *movement = DOWN_KICK;
+                check_and_apply_damage(p, opponent, 30, alreadyDamaged, DOWN_KICK);
+                break;
+            case ATTACK_JUMPING_PUNCH:
+                *movement = JUMPING_PUNCH;
+                check_and_apply_damage(p, opponent, 25, alreadyDamaged, JUMPING_PUNCH);
+                break;
+            default:
+                *alreadyDamaged = 0;
+                break;
+        }
+    }
+}
+
 
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
 int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
@@ -464,17 +482,30 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
                 handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
+                
+                if (player_1->isDefending == 1) movement1 = DEFENDING;
+                else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
+                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
+
+                defense(player_1, movement1, &frame1, maxFrame1);
                 being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
                 handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
+
+                if (player_2->isDefending == 1) movement2 = DEFENDING;
+                else if (player_2->isDefending == 2) movement2 = DEFENDING_DOWN;
+                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;
+                defense(player_2, movement2, &frame2, maxFrame2);
                 being_hit(player_2, movement2, &frame2, maxFrame2);
 
                 if (timer_count % 4 == 0) {

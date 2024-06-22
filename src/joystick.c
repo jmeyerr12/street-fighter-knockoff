@@ -8,7 +8,8 @@ joystick* joystick_create(){
 	element->up = 0;												
 	element->down = 0;		
 	element->up_left = 0;
-	element->up_right = 0;											
+	element->up_right = 0;	
+	element->down_left = 0;											
 	return element;						
 }
 
@@ -19,3 +20,5 @@ void joystick_up(joystick *element) { element->up = element->up ^ 1;}
 void joystick_up_right(joystick *element) { element->up_right = element->up_right ^ 1;}	
 void joystick_up_left(joystick *element) { element->up_left = element->up_left ^ 1;}		
 void joystick_down(joystick *element) { element->down = element->down ^ 1;}	
+void joystick_down_left(joystick *element) { element->down_left = element->down_left ^ 1;}	
+void joystick_down_right(joystick *element) { element->down_right = element->down_right ^ 1;}

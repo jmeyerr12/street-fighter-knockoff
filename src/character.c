@@ -78,20 +78,46 @@ bool isInRange(player *attacker, player *defender, int attack) {
 }
 
 
-size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS SPRITES!
-    size initSizes[4][12] = { //                                                          --NADA FEITO POR AQUI                      
-        //IDLE     WALKING   PUNCHING  KICKING    DOWN     JUMP      JUMP FWD  JUMP BCK  JUMP_KICK DOWN_PUNCH JUMP_PUNCH DOWN_KICK
-        {{72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 59}, {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 66}, {72, 85}, {72, 66}},   // chun li  -- DONE  (aproximado (problema com diferenças ao longo do eixo y))
-        {{60, 90}, {60, 90}, {60, 90}, {60, 90}, {61, 59}, {60, 90}, {60, 90}, {60, 90}, {60, 90}, {61, 61}, {60, 90}, {61, 61}},   // ken  -- DONE
-        {{100, 70}, {98, 71}, {99, 69}, {100, 70}, {99, 68}, {98, 69}, {100, 70}, {99, 71}, {48,70}, {61,61}, {48,70}, {61,61}}, // zangief
-        {{95, 60}, {97, 62}, {93, 61}, {95, 63}, {94, 60}, {96, 62}, {95, 60}, {97, 61}, {48,70}, {61,61}, {48,70}, {61,61}}   // bison 
+size** characterSizes() {
+    // Tamanhos comuns para cada personagem
+    size commonSizes[4] = {
+        {72, 85}, // chun li
+        {60, 90}, // ken
+        {100, 70}, // zangief
+        {95, 60}  // bison
+    };
+
+    // Tamanhos específicos de salto para cada personagem
+    size jumpSizes[4][5] = {
+        { {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85} },   // chun li
+        { {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90} },   // ken
+        { {98, 69}, {100, 70}, {99, 71}, {48, 70}, {48, 70} }, // zangief
+        { {96, 62}, {95, 60}, {97, 61}, {48, 70}, {48, 70} }   // bison 
+    };
+
+    // Tamanhos específicos de agachamento para cada personagem
+    size downSizes[4][4] = {
+        { {72, 66}, {72, 66}, {72, 59}, {72, 59} },   // chun li
+        { {61, 61}, {61, 61}, {61, 59}, {61, 59} },   // ken
+        { {61, 61}, {61, 61}, {99, 68}, {99, 68} }, // zangief
+        { {61, 61}, {61, 61}, {94, 60}, {94, 60} }   // bison 
     };
 
     size** charSizes = malloc(4 * sizeof(size*)); 
 
     for (int i = 0; i < 4; i++) {
-        charSizes[i] = malloc(12 * sizeof(size)); 
-        memcpy(charSizes[i], initSizes[i], 12 * sizeof(size)); 
+        charSizes[i] = malloc(16 * sizeof(size)); 
+
+        // Copiar tamanhos comuns para os primeiros 6 estados
+        for (int j = 0; j < 6; j++) {
+            charSizes[i][j] = commonSizes[i];
+        }
+
+        // Copiar tamanhos específicos de salto para os próximos 5 estados
+        memcpy(&charSizes[i][6], jumpSizes[i], 5 * sizeof(size)); 
+
+        // Copiar tamanhos específicos de agachamento para os últimos 4 estados
+        memcpy(&charSizes[i][11], downSizes[i], 4 * sizeof(size)); 
     }
 
     return charSizes;
@@ -99,10 +125,16 @@ size** characterSizes() { //TRANSFORMAR EM MATRIZ DE VETORES PARA PEGAR TODOS OS
 // chun li previous tested sizes -> {{43, 87}, {43, 87}, {50, 87}, {50, 87}, {71, 66}, {50, 75}, {50, 75}, {50, 75}, {50, 75}, {71, 66}, {50, 75}, {71, 66}}, 
 
 void freeCharacterSizes(size** charSizes) {
-    for (int i = 0; i < 4; i++) {
-        free(charSizes[i]);
+    if (charSizes) {
+        for (int i = 0; i < 4; i++) {
+            if (charSizes[i]) {
+                free(charSizes[i]);
+                charSizes[i] = NULL;  // Definir o ponteiro como nulo após liberar a memória
+            }
+        }
+        free(charSizes);
+        charSizes = NULL;  // Definir o ponteiro como nulo após liberar a memória
     }
-    free(charSizes); 
 }
 
 void setDimensions(player *p, unsigned int width, unsigned int height) {
@@ -135,6 +167,7 @@ player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsi
 	new->control = joystick_create();		
     new->isBeingHit = 0;			
     new->stamina = 100;				
+    new->isDefending = 0;
 	return new;						
 }
 
@@ -206,6 +239,7 @@ void resetPlayer(player *element) {
     element->control->down = 0;
     element->control->up_left = 0;
     element->control->up_right = 0;
+    element->control->down_left = 0;
 }
 
 void movePlayer(player *element, char steps, unsigned char trajectory) {

@@ -37,6 +37,8 @@
 #define DAMAGED 12
 #define DAMAGED_JMP 13
 #define DAMAGED_DOWN 14
+#define DEFENDING 15
+#define DEFENDING_DOWN 16
 
 #define SPRITE_HEIGHT 112
 #define SPRITE_WIDTH 112
@@ -71,7 +73,7 @@ typedef struct {
     int health;
     joystick *control;
     float speed_y, speed_x;         
-    int isJumping, isDown;  //implementar no codigo mudanca de altura, nao esta feita (isDown)
+    int isJumping, isDown, isDefending;  //implementar no codigo mudanca de altura, nao esta feita (isDown)
     int attack;
     int previous_movement;
     int stamina; //implementar (parece simples)
