@@ -68,9 +68,9 @@
 #define MENU_EXIT 2
 
 // Codigo dos sprites de personagens
-#define KEN 0
-#define CHUN_LI 1
-#define BISON 2
-#define ZANGIEF 3
+#define CHUN_LI 0
+#define KEN 1
+#define ZANGIEF 2
+#define BISON 3
 
 #endif

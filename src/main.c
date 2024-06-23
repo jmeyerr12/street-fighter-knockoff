@@ -106,7 +106,7 @@ int main() {
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas
-                showEndgame(font, p1Wins > p2Wins ? 1 : 2);
+                if (p1Wins > 2 || p2Wins > 2) showEndgame(font, p1Wins > p2Wins ? 1 : 2);
                 p1Wins = 0; p2Wins = 0;
                 roundCounter = 0;
                 state = MENU;

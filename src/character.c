@@ -28,9 +28,9 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
     // y axis           PUNCH  KICK
     int top_gaps[4][2] = {{10, 29}, //chun li
-                          {67, 25}, //ken
-                          {77, 12}, //zangief
-                          {69, 58}}; //bison
+                          {15, 40}, //ken
+                          {14, 44}, //zangief
+                          {2, 28}}; //bison
 
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
@@ -46,14 +46,16 @@ bool isInRange(player *attacker, player *defender, int attack) {
         case PUNCH:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_PUNCH-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_PUNCH-1] : 0);
-            attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y - 60;
+            attacker_top = attacker->NW.y + top_gaps[attacker->sprite][0];
+            attacker_bottom = attacker->SE.y - bottom_gaps[attacker->sprite][0];//- 60;
+            printPlayerStatistics(attacker,1);
+            printPlayerStatistics(defender,2);
             break;
         case KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_KICK-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_KICK-1] : 0);
-            attacker_top = attacker->NW.y + 40;
-            attacker_bottom = attacker->SE.y;
+            attacker_top = attacker->NW.y + top_gaps[attacker->sprite][1]; //+ 40;
+            attacker_bottom = attacker->SE.y - bottom_gaps[attacker->sprite][1];
             break;
         case JUMPING_KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_JUMPING_KICK-1]);
@@ -92,9 +94,37 @@ bool isInRange(player *attacker, player *defender, int attack) {
     return horizontal_overlap && vertical_overlap;
 }
 
+void printCharacterSizes(size** charSizes) {
+    const char* states[] = {
+        "Idle", "Walking", "Punching", "Kicking", "Defending", "Damaged",
+        "Jumping 1", "Jumping 2", "Jumping 3", "Jumping 4", "Jumping 5",
+        "Crouching 1", "Crouching 2", "Crouching 3", "Crouching 4", "Crouching 5"
+    };
+
+    const char* characters[] = {
+        "Chun Li", "Ken", "Zangief", "Bison"
+    };
+
+    // Print header
+    printf("%15s", "");
+    for (int j = 0; j < 16; j++) {
+        printf("%15s", states[j]);
+    }
+    printf("\n");
+
+    // Print each character's sizes
+    for (int i = 0; i < 4; i++) {
+        printf("%15s", characters[i]);
+        for (int j = 0; j < 16; j++) {
+            printf("%7u x %-7u", charSizes[i][j].width, charSizes[i][j].height);
+        }
+        printf("\n");
+    }
+}
+
 
 size** characterSizes() {
-    // Tamanhos comuns para cada personagem (idle, walking, punching, kicking, defending, damaged)
+    // Tamanhos comuns para cada personagem (idle, walking, punching, kicking, defending, damaged, winner, loser)
     size commonSizes[4] = {
         {59, 85}, // chun li
         {53, 90}, // ken
@@ -121,22 +151,32 @@ size** characterSizes() {
     size** charSizes = malloc(4 * sizeof(size*)); 
 
     for (int i = 0; i < 4; i++) {
-        charSizes[i] = malloc(16 * sizeof(size)); 
+        charSizes[i] = malloc(19 * sizeof(size)); 
 
-        // copia tamanhos comuns para os primeiros 6 estados
-        for (int j = 0; j < 6; j++) {
+        // copia tamanhos comuns para os primeiros estados
+        for (int j = 0; j <= KICK; j++) {
             charSizes[i][j] = commonSizes[i];
         }
 
-        // copia tamanho específico de salto para os estados de salto
-        for (int j = 6; j < 11; j++) {
+        // tamanho para GET_DOWN
+        charSizes[i][GET_DOWN] = downSizes[i];
+
+        // copia tamanhos de salto para os estados de salto
+        for (int j = JUMP; j <= JUMPING_PUNCH; j++) {
             charSizes[i][j] = jumpSizes[i];
         }
 
-        // copia tamanho específico de agachamento para os estados de agachamento
-        for (int j = 11; j < 16; j++) {
+        // copia tamanhos de agachamento para os estados de agachamento
+        for (int j = DOWN_KICK; j <= DAMAGED_DOWN; j++) {
             charSizes[i][j] = downSizes[i];
         }
+
+        // copia tamanhos comuns para DAMAGED, DEFENDING, WINNER e LOSER
+        charSizes[i][DAMAGED] = commonSizes[i];
+        charSizes[i][DEFENDING] = commonSizes[i];
+        charSizes[i][DEFENDING_DOWN] = downSizes[i];
+        charSizes[i][WINNER] = commonSizes[i];
+        charSizes[i][LOSER] = commonSizes[i];
     }
 
     return charSizes;
@@ -367,6 +407,7 @@ int countFrames(int movement) {
 
 void updateDimensions(player *p, size** charSizes, int movement) {
     p->height = charSizes[p->sprite][movement].height;
+    p->width = charSizes[p->sprite][movement].width;
 }
 
 void handle_down(player *p, int mv, int *frame, int maxFrames, int timer_count) {

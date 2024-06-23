@@ -12,6 +12,7 @@
 #include "collision.h"
 #include "player_type.h"
 #include "graphics.h"
+#include "utils.h"
 
 // Funções de criação, inicialização e liberação de memória de jogadores
 player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height, int direction); // Cria e inicializa um jogador
