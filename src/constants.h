@@ -39,6 +39,8 @@
 #define DAMAGED_DOWN 14
 #define DEFENDING 15
 #define DEFENDING_DOWN 16
+#define WINNER 17
+#define LOSER 18
 
 // Definições de ataque
 #define ATTACK_PUNCH 1

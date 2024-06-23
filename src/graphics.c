@@ -131,7 +131,7 @@ void draw_character_selection(ALLEGRO_BITMAP* sprite_sheet, int sprite_index, in
                           x, y, 0);
 }
 
-void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads) { 
+void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BITMAP* heads, int done1, int done2) { 
     al_clear_to_color(al_map_rgb(0, 0, 0));
     ALLEGRO_COLOR blue = al_map_rgb(0, 0, 255); //blue
     ALLEGRO_COLOR red = al_map_rgb(255, 0, 0); //red
@@ -150,12 +150,15 @@ void draw_characters_menu(int selected_option1, int selected_option2, ALLEGRO_BI
     al_draw_bitmap_region(heads, 0, 32 + selected_option2 * 16, 96, 16, 
                         (X_SCREEN*3)/5, Y_SCREEN/2, 0);
     al_draw_bitmap_region(heads, selected_option2*112, 96, 112, 112, 
-                        (X_SCREEN*1)/2, Y_SCREEN-115, ALLEGRO_FLIP_HORIZONTAL);
+                        (X_SCREEN*1)/2+20, Y_SCREEN-115, ALLEGRO_FLIP_HORIZONTAL);
 
     draw_character_selection(heads, 0, start_x, start_y, sprite_dimensions, selected_option1==0? blue : (selected_option2==0? red : white));
     draw_character_selection(heads, 1, start_x + sprite_dimensions, start_y, sprite_dimensions, selected_option1==1? blue : (selected_option2==1? red : white));
     draw_character_selection(heads, 2, start_x, start_y + sprite_dimensions+3, sprite_dimensions, selected_option1==2? blue : (selected_option2==2? red : white));
     draw_character_selection(heads, 3, start_x + sprite_dimensions, start_y + sprite_dimensions+3, sprite_dimensions, selected_option1==3? blue : (selected_option2==3? red : white));
+    
+    if (done1 && done2) al_draw_bitmap_region(heads, 0, 272, 112, 112, (X_SCREEN / 2) - (64 / 2), (Y_SCREEN/2) + 64, 0);
+    
     al_flip_display();
 }
 
@@ -256,8 +259,10 @@ void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_s
     while (!(done1 && done2)) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
-        draw_characters_menu(*selected_option1, *selected_option2, heads);  
+        draw_characters_menu(*selected_option1, *selected_option2, heads, done1, done2);  
         al_clear_to_color(al_map_rgb(0, 0, 0));
+
+        if (done1 && done2) al_draw_bitmap_region(heads, 0, 276 - 48, 64, 48, (X_SCREEN / 2) - (64 / 2), (Y_SCREEN / 2) - (48 / 2), 0);
         
         if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
             switch (event.keyboard.keycode) {
@@ -329,7 +334,7 @@ void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_s
     else if (*selected_option2 == 2) *player2_sheet = al_load_bitmap("./assets/characters/zangief.png");
     else if (*selected_option2 == 3) *player2_sheet = al_load_bitmap("./assets/characters/bison.png");
 
-    draw_characters_menu(*selected_option1, *selected_option2, heads);  
+    draw_characters_menu(*selected_option1, *selected_option2, heads, done1, done2);  
     al_rest(1.5); 
 
     al_destroy_bitmap(heads); 
@@ -381,4 +386,34 @@ void destroy_animated_background(background* bg) {
             }
         }
     }
+}
+
+void showWinner(ALLEGRO_FONT *font, int winner) {
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    if (winner == 0) {
+        al_draw_text(font, al_map_rgb(255, 255, 0),
+                X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "DRAW");
+    } else {
+        char text[100];
+        sprintf(text, "PLAYER %d WINS THE ROUND", winner);
+        al_draw_text(font, al_map_rgb(255, 255, 0),
+                X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, text);
+    }
+    al_flip_display();
+    al_rest(1);
+}
+
+void showEndgame(ALLEGRO_FONT *font, int winner) {
+    al_clear_to_color(al_map_rgb(0, 0, 0));
+    if (winner == 0) {
+        al_draw_text(font, al_map_rgb(255, 255, 0),
+                X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "DRAW");
+    } else {
+        char text[100];
+        sprintf(text, "PLAYER %d WINS THE MATCH", winner);
+        al_draw_text(font, al_map_rgb(255, 255, 0),
+                X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, text);
+    }
+    al_flip_display();
+    al_rest(1);
 }

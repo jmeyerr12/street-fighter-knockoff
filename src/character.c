@@ -82,7 +82,7 @@ bool isInRange(player *attacker, player *defender, int attack) {
 
 
 size** characterSizes() {
-    // Tamanhos comuns para cada personagem (idle)
+    // Tamanhos comuns para cada personagem (idle, walking, punching, kicking, defending, damaged)
     size commonSizes[4] = {
         {72, 85}, // chun li
         {60, 90}, // ken
@@ -91,19 +91,19 @@ size** characterSizes() {
     };
 
     // Tamanhos específicos de salto para cada personagem
-    size jumpSizes[4][5] = {
-        { {72, 85}, {72, 85}, {72, 85}, {72, 85}, {72, 85} },   // chun li
-        { {60, 90}, {60, 90}, {60, 90}, {60, 90}, {60, 90} },   // ken
-        { {98, 69}, {100, 70}, {99, 71}, {48, 70}, {48, 70} }, // zangief
-        { {96, 62}, {95, 60}, {97, 61}, {48, 70}, {48, 70} }   // bison 
+    size jumpSizes[4] = {
+        {72, 85},   // chun li
+        {60, 90},   // ken
+        {98, 69}, // zangief
+        {96, 62}   // bison 
     };
 
     // Tamanhos específicos de agachamento para cada personagem
-    size downSizes[4][4] = {
-        { {72, 66}, {72, 66}, {72, 59}, {72, 59} },   // chun li
-        { {61, 61}, {61, 61}, {61, 59}, {61, 59} },   // ken
-        { {61, 61}, {61, 61}, {99, 68}, {99, 68} }, // zangief
-        { {61, 61}, {61, 61}, {94, 60}, {94, 60} }   // bison 
+    size downSizes[4] = {
+        {72, 66},   // chun li
+        {61, 61},   // ken
+        {61, 61}, // zangief
+        {61, 61}   // bison 
     };
 
     size** charSizes = malloc(4 * sizeof(size*)); 
@@ -111,21 +111,24 @@ size** characterSizes() {
     for (int i = 0; i < 4; i++) {
         charSizes[i] = malloc(16 * sizeof(size)); 
 
-        // Copiar tamanhos comuns para os primeiros 6 estados
+        // copia tamanhos comuns para os primeiros 6 estados
         for (int j = 0; j < 6; j++) {
             charSizes[i][j] = commonSizes[i];
         }
 
-        // Copiar tamanhos específicos de salto para os próximos 5 estados
-        memcpy(&charSizes[i][6], jumpSizes[i], 5 * sizeof(size)); 
+        // copia tamanho específico de salto para os estados de salto
+        for (int j = 6; j < 11; j++) {
+            charSizes[i][j] = jumpSizes[i];
+        }
 
-        // Copiar tamanhos específicos de agachamento para os últimos 4 estados
-        memcpy(&charSizes[i][11], downSizes[i], 4 * sizeof(size)); 
+        // copia tamanho específico de agachamento para os estados de agachamento
+        for (int j = 11; j < 16; j++) {
+            charSizes[i][j] = downSizes[i];
+        }
     }
 
     return charSizes;
 }
-// chun li previous tested sizes -> {{43, 87}, {43, 87}, {50, 87}, {50, 87}, {71, 66}, {50, 75}, {50, 75}, {50, 75}, {50, 75}, {71, 66}, {50, 75}, {71, 66}}, 
 
 void freeCharacterSizes(size** charSizes) {
     if (charSizes) {
@@ -185,6 +188,10 @@ void resetAttributes(player **p, unsigned int width, unsigned int height, unsign
 	(*p)->x = x;										
 	(*p)->y = y;	
     (*p)->health = 1000;		
+    (*p)->stamina = 100;
+    (*p)->isBeingHit = 0;
+    (*p)->attack = 0;
+    (*p)->isDefending = 0;
 }
 
 //p->x, py, p->x+p->width, py, p->x, py+p->height, p->x+p->width, py+p->height,
@@ -429,11 +436,11 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
         switch (p->attack) {
             case ATTACK_KICK:
                 *movement = KICK;
-                check_and_apply_damage(p, opponent, 40, alreadyDamaged, KICK, ATTACK_KICK);
+                check_and_apply_damage(p, opponent, 50, alreadyDamaged, KICK, ATTACK_KICK);
                 break;
             case ATTACK_PUNCH:
                 *movement = PUNCH;
-                check_and_apply_damage(p, opponent, 30, alreadyDamaged, PUNCH, ATTACK_PUNCH);
+                check_and_apply_damage(p, opponent, 40, alreadyDamaged, PUNCH, ATTACK_PUNCH);
                 break;
             case ATTACK_JUMPING_KICK:
                 *movement = JUMPING_KICK;
@@ -449,7 +456,7 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
                 break;
             case ATTACK_JUMPING_PUNCH:
                 *movement = JUMPING_PUNCH;
-                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
+                check_and_apply_damage(p, opponent, 55, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
                 break;
             default:
                 *alreadyDamaged = 0;

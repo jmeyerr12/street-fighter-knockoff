@@ -1,3 +1,19 @@
 COLOCAR VS quando personagens selecionados
 Fazer tela de endgame
 Arrumar single player (ataques do bot nao dao dano quando o inimigo esta na direita), verificar se esta funcionando a estamina
+Tentar descobrir por que fica lento os menu apos finalizar jogo
+
+
+    if (p2->isBeingHit == 1) {
+        *movement = DAMAGED;
+        p2->speed_x = p2->direction ? 1 : -1;
+        return;
+    } else if (p2->isBeingHit == 2) {
+        *movement = DAMAGED_DOWN;
+        p2->speed_x = p2->direction ? 1 : -1;
+        return;
+    } else if (p2->isBeingHit == 3) {
+        *movement = DAMAGED_JMP;
+        p2->speed_x = p2->direction ? 1 : -1;
+        return;
+    }

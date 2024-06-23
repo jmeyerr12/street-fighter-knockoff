@@ -159,14 +159,39 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         }
 
         if (pause_option == MENU) break;
+    }
 
-        //check_v_key_and_print_position(&event, player_1, player_2);
-        /* if (timer_count % 120 == 0) { 
-            printf("\n\n -- %d -- ", timer_count / 30);
-            printf("\n---------- %f", al_get_time());
-            printPlayerStatistics(player_1, 1);
-            printPlayerStatistics(player_2, 2);
-        }  */
+    // Desenhar o vencedor ao final do jogo
+    if (p1Wins+1 >= 2 || p2Wins+1 >= 2) {
+        int winner = (p1Wins > p2Wins) ? 1 : 2;
+        int frame = 0;
+        int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
+
+        while (frame < maxWinnerFrames) {
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            draw_animated_background(&bg);
+
+            if (winner == 1) {
+                draw_player(player1_sheet, player_1, frame, WINNER, player_1->direction == LEFT ? 0 : 1);
+                draw_player(player2_sheet, player_2, frame, LOSER, player_2->direction == LEFT ? 0 : 1);
+            } else {
+                draw_player(player2_sheet, player_2, frame, WINNER, player_2->direction == LEFT ? 0 : 1);
+                draw_player(player1_sheet, player_1, frame, LOSER, player_1->direction == LEFT ? 0 : 1);
+            }
+
+            al_flip_display();
+            al_rest(0.5); // Tempo entre os quadros da animação
+            frame++;
+        }
+
+        // Mensagem final de vitória
+        char winnerText[50];
+        sprintf(winnerText, "PLAYER %d WINS", winner);
+
+        al_draw_filled_rectangle(X_SCREEN / 2 - 60, Y_SCREEN / 2 - 20, X_SCREEN / 2 + 60, Y_SCREEN / 2 + 20, al_map_rgb(0, 0, 0));
+        al_draw_text(font, al_map_rgb(255, 255, 0), X_SCREEN / 2, Y_SCREEN / 2 - 10, ALLEGRO_ALIGN_CENTER, winnerText);
+        al_flip_display();
+        al_rest(3.0); // Tempo para exibir a mensagem final
     }
 
     al_destroy_timer(timer);
@@ -271,7 +296,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 const int player1_keys[] = {ALLEGRO_KEY_W, ALLEGRO_KEY_A, ALLEGRO_KEY_D, ALLEGRO_KEY_S, ALLEGRO_KEY_R, ALLEGRO_KEY_F};
                 handle_player_input(&key_state, player_1, player1_keys, &movement1);
 
-                handle_bot_input(player_1, player_2, &movement2);
+                handle_bot_input(player_1, player_2, &movement2, timer_count);
                 
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
@@ -341,6 +366,39 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
             printPlayerStatistics(player_1, 1);
             printPlayerStatistics(player_2, 2);
         } */
+    }
+
+    // Desenhar o vencedor ao final do jogo
+    if (p1Wins+1 >= 2 || p2Wins+1 >= 2) {
+        int winner = (p1Wins > p2Wins) ? 1 : 2;
+        int frame = 0;
+        int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
+
+        while (frame < maxWinnerFrames) {
+            al_clear_to_color(al_map_rgb(0, 0, 0));
+            draw_animated_background(&bg);
+
+            if (winner == 1) {
+                draw_player(player1_sheet, player_1, frame, WINNER, player_1->direction == LEFT ? 0 : 1);
+                draw_player(player2_sheet, player_2, frame, LOSER, player_2->direction == LEFT ? 0 : 1);
+            } else {
+                draw_player(player2_sheet, player_2, frame, WINNER, player_2->direction == LEFT ? 0 : 1);
+                draw_player(player1_sheet, player_1, frame, LOSER, player_1->direction == LEFT ? 0 : 1);
+            }
+
+            al_flip_display();
+            al_rest(0.5); // Tempo entre os quadros da animação
+            frame++;
+        }
+
+        // Mensagem final de vitória
+        char winnerText[50];
+        sprintf(winnerText, "PLAYER %d WINS", winner);
+
+        al_draw_filled_rectangle(X_SCREEN / 2 - 60, Y_SCREEN / 2 - 20, X_SCREEN / 2 + 60, Y_SCREEN / 2 + 20, al_map_rgb(0, 0, 0));
+        al_draw_text(font, al_map_rgb(255, 255, 0), X_SCREEN / 2, Y_SCREEN / 2 - 10, ALLEGRO_ALIGN_CENTER, winnerText);
+        al_flip_display();
+        al_rest(3.0); // Tempo para exibir a mensagem final
     }
 
     al_destroy_timer(timer);
