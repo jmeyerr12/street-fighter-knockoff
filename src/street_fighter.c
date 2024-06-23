@@ -13,7 +13,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     al_start_timer(timer);
 
     double lastTime = al_get_time();
-    int running = 1;
+    int running = 0; 
     int frame1 = 0, frame2 = 0;
     int timer_count = 0;
     int maxFrame1 = 5, maxFrame2 = 5;
@@ -52,6 +52,8 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     al_flip_display();
     al_rest(1.5); 
 
+    running = 1; 
+
     int pausedTime = 0;
     while (true) {
         ALLEGRO_EVENT event;
@@ -63,9 +65,9 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
             running = !running;
             if (running) {
-                lastTime = al_get_time() - pausedTime; //adjust the timer when resuming
+                lastTime = al_get_time() - pausedTime; // Adjust the timer when resuming
             } else {
-                pausedTime = al_get_time() - lastTime; //record the time when pausing
+                pausedTime = al_get_time() - lastTime; // Record the time when pausing
             }
         }
 
@@ -158,7 +160,6 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
         if (pause_option == MENU) break;
 
-
         //check_v_key_and_print_position(&event, player_1, player_2);
         /* if (timer_count % 120 == 0) { 
             printf("\n\n -- %d -- ", timer_count / 30);
@@ -189,7 +190,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
 
     double lastTime = al_get_time();
     double pausedTime = 0;
-    int running = 1;
+    int running = 0;
     int frame1 = 0, frame2 = 0;
     int timer_count = 0;
     int maxFrame1 = 5, maxFrame2 = 5;
@@ -224,6 +225,8 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
     al_draw_text(font, al_map_rgb(255, 255, 0), X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, roundText);
     al_flip_display();
     al_rest(1.5); 
+
+    running = 1;
 
     while (true) {
         ALLEGRO_EVENT event;
@@ -282,23 +285,23 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
 
-                defense(player_2, movement2, &frame2, maxFrame2);
+                defense(player_1, movement1, &frame1, maxFrame1);
                 being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
                 handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
              
-                if (player_1->isDefending == 1) movement1 = DEFENDING;
-                else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
-                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+                if (player_2->isDefending == 1) movement2 = DEFENDING;
+                else if (player_2->isDefending == 2) movement2 = DEFENDING_DOWN;
+                else if (movement2 == DEFENDING_DOWN) movement2 = GET_DOWN; 
 
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;
 
                 defense(player_2, movement2, &frame2, maxFrame2);
-                being_hit(player_1, movement1, &frame1, maxFrame1);
+                being_hit(player_2, movement2, &frame2, maxFrame2);
 
                 if (timer_count % 4 == 0) {
                     recharge_stamina(player_1);

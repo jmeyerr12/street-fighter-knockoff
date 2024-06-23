@@ -20,7 +20,7 @@ void freePlayer(player *p); // Libera a memória alocada para um jogador
 
 // Funções de movimentação e atualização de estado
 void movePlayer(player *element, char steps, unsigned char trajectory); // Move o jogador com base na quantidade de passos e trajetória
-void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds); // Atualiza a posição e o estado do jogador com base no tempo e nos limites do jogo
+void updatePlayer(player *element, float time, unsigned short groundLevel); // Atualiza a posição e o estado do jogador com base no tempo e nos limites do jogo
 void resetPlayer(player* p); // Redefine o estado do jogador para o estado inicial
 void try_move_player(player *p, player *other, int multiplier, int direction); // Tenta mover o jogador e verifica colisões com outro jogador, revertendo a posição se necessário
 void update_position(player *player_1, player *player_2, float time); // Atualiza a posição dos jogadores com base no tempo

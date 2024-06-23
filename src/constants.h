@@ -9,7 +9,7 @@
 #define X_SCREEN 600								
 #define Y_SCREEN 300	
 
-// Outros constantes
+// Outras constantes
 #define NUM_FRAMES 8
 #define STAMINA_DECREASE 15
 
@@ -64,5 +64,11 @@
 #define MENU_START 0
 #define MENU_SINGLE_PLAYER 1
 #define MENU_EXIT 2
+
+// Codigo dos sprites de personagens
+#define KEN 0
+#define CHUN_LI 1
+#define BISON 2
+#define ZANGIEF 3
 
 #endif

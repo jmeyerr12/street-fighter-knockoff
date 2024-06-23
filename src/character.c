@@ -35,7 +35,7 @@ bool isInRange(player *attacker, player *defender, int attack) {
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_PUNCH-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y;// - 60;
+            attacker_bottom = attacker->SE.y - 60;
             break;
         case KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_KICK-1]);
@@ -47,25 +47,25 @@ bool isInRange(player *attacker, player *defender, int attack) {
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_JUMPING_KICK-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_JUMPING_KICK-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y + 60;
+            attacker_bottom = attacker->SE.y;
             break;
         case JUMPING_PUNCH:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_JUMPING_PUNCH-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_JUMPING_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y + 60;
+            attacker_bottom = attacker->SE.y;
             break;
         case DOWN_KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_DOWN_KICK-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_DOWN_KICK-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y + 60;
+            attacker_bottom = attacker->SE.y;
             break;
         case DOWN_PUNCH:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_DOWN_PUNCH-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_DOWN_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y + 60;
+            attacker_bottom = attacker->SE.y;
             break;
         default:
             return false;  
@@ -216,7 +216,7 @@ void recharge_stamina(player *p) {
     if (p->stamina < 100) p->stamina++;
 }
 
-void updatePlayer(player *element, float time, unsigned short groundLevel, unsigned int bounds) {
+void updatePlayer(player *element, float time, unsigned short groundLevel) {
     element->speed_y += GRAVITY*time;
     
     element->x += element->speed_x;
@@ -229,7 +229,7 @@ void updatePlayer(player *element, float time, unsigned short groundLevel, unsig
         element->speed_x = 0;
     }
 
-    if ((element->x <= 6) || (element->SE.x >= 600 - 6)) 
+    if ((element->x <= 6) || (element->SE.x >= X_SCREEN - 6)) 
         element->speed_x = 0;
 
     setHitbox(element);
@@ -429,27 +429,27 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
         switch (p->attack) {
             case ATTACK_KICK:
                 *movement = KICK;
-                check_and_apply_damage(p, opponent, 30, alreadyDamaged, KICK, ATTACK_KICK);
+                check_and_apply_damage(p, opponent, 40, alreadyDamaged, KICK, ATTACK_KICK);
                 break;
             case ATTACK_PUNCH:
                 *movement = PUNCH;
-                check_and_apply_damage(p, opponent, 20, alreadyDamaged, PUNCH, ATTACK_PUNCH);
+                check_and_apply_damage(p, opponent, 30, alreadyDamaged, PUNCH, ATTACK_PUNCH);
                 break;
             case ATTACK_JUMPING_KICK:
                 *movement = JUMPING_KICK;
-                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_KICK, ATTACK_JUMPING_KICK);
+                check_and_apply_damage(p, opponent, 45, alreadyDamaged, JUMPING_KICK, ATTACK_JUMPING_KICK);
                 break;
             case ATTACK_DOWN_PUNCH:
                 *movement = DOWN_PUNCH;
-                check_and_apply_damage(p, opponent, 25, alreadyDamaged, DOWN_PUNCH, ATTACK_DOWN_PUNCH);
+                check_and_apply_damage(p, opponent, 35, alreadyDamaged, DOWN_PUNCH, ATTACK_DOWN_PUNCH);
                 break;
             case ATTACK_DOWN_KICK:
                 *movement = DOWN_KICK;
-                check_and_apply_damage(p, opponent, 30, alreadyDamaged, DOWN_KICK, ATTACK_DOWN_KICK);
+                check_and_apply_damage(p, opponent, 40, alreadyDamaged, DOWN_KICK, ATTACK_DOWN_KICK);
                 break;
             case ATTACK_JUMPING_PUNCH:
                 *movement = JUMPING_PUNCH;
-                check_and_apply_damage(p, opponent, 25, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
+                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
                 break;
             default:
                 *alreadyDamaged = 0;
@@ -506,8 +506,8 @@ void update_position(player *player_1, player *player_2, float time) {
     out_of_bounds(player_1);
     out_of_bounds(player_2);
 
-    updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
-    updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
+    updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT);
+    updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT);
 }
 
 void freePlayer(player *p) {
