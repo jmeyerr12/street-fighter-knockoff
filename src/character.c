@@ -14,11 +14,23 @@ void try_move_player(player *p, player *other, int multiplier, int direction) {
 }
 
 bool isInRange(player *attacker, player *defender, int attack) {
-    //                 PNCH KCK JMPK JMPP DWNK DWNP
-    int ranges[4][6] = {{30, 30, 30, 30, 30, 30}, //chun li
-                        {30, 30, 30, 30, 30, 30}, //ken
-                        {30, 30, 30, 30, 30, 30}, //zangief
-                        {30, 30, 30, 30, 30, 30}}; //bison
+    // x axis          PNCH KCK JMPK JMPP DWNK DWNP
+    int ranges[4][6] = {{42, 30, 60, 33, 36, 36}, //chun li
+                        {39, 27, 33, 20, 50, 35}, //ken
+                        {37, 37, 38, 38, 37, 37}, //zangief
+                        {20, 42, 46, 46, 37, 38}}; //bison
+    
+    // y axis              PUNCH  KICK
+    int bottom_gaps[4][2] = {{66, 47}, //chun li
+                             {67, 25}, //ken
+                             {77, 12}, //zangief
+                             {69, 58}}; //bison
+
+    // y axis           PUNCH  KICK
+    int top_gaps[4][2] = {{10, 29}, //chun li
+                          {67, 25}, //ken
+                          {77, 12}, //zangief
+                          {69, 58}}; //bison
 
     int attacker_left = attacker->NW.x;
     int attacker_right = attacker->SE.x;
@@ -84,26 +96,26 @@ bool isInRange(player *attacker, player *defender, int attack) {
 size** characterSizes() {
     // Tamanhos comuns para cada personagem (idle, walking, punching, kicking, defending, damaged)
     size commonSizes[4] = {
-        {72, 85}, // chun li
-        {60, 90}, // ken
-        {100, 70}, // zangief
-        {95, 60}  // bison
+        {59, 85}, // chun li
+        {53, 90}, // ken
+        {75, 110}, // zangief
+        {70, 96}  // bison
     };
 
     // Tamanhos específicos de salto para cada personagem
     size jumpSizes[4] = {
-        {72, 85},   // chun li
-        {60, 90},   // ken
-        {98, 69}, // zangief
-        {96, 62}   // bison 
+        {50, 84},   // chun li
+        {77, 89},   // ken
+        {74, 99}, // zangief
+        {66, 66}   // bison 
     };
 
     // Tamanhos específicos de agachamento para cada personagem
     size downSizes[4] = {
-        {72, 66},   // chun li
+        {71, 66},   // chun li
         {61, 61},   // ken
-        {61, 61}, // zangief
-        {61, 61}   // bison 
+        {75, 79}, // zangief
+        {74, 62}   // bison 
     };
 
     size** charSizes = malloc(4 * sizeof(size*)); 
