@@ -49,7 +49,7 @@
 #define ATTACK_DOWN_KICK 6
 
 // Física
-#define STEP 3	
+#define STEP 2	
 #define GRAVITY 320
 #define INITIAL_JUMP_SPEED -280.0	
 

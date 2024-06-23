@@ -35,7 +35,7 @@ bool isInRange(player *attacker, player *defender, int attack) {
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_PUNCH-1]);
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_PUNCH-1] : 0);
             attacker_top = attacker->NW.y;
-            attacker_bottom = attacker->SE.y - 60;
+            attacker_bottom = attacker->SE.y;// - 60;
             break;
         case KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_KICK-1]);
@@ -383,18 +383,42 @@ void handle_jump(player *p, player *opponent, int *movement) {
     }
 }
 
-void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attackType) {
-    if (isInRange(p, opponent, attackType) && !(*alreadyDamaged)) {
+void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attack, int attackType) {
+    if (isInRange(p, opponent, attack) && !(*alreadyDamaged)) {
         *alreadyDamaged = 1;
-        if ((opponent->direction == LEFT && !(opponent->control->left || opponent->control->down_left)) ||
-            (opponent->direction == RIGHT && !(opponent->control->right || opponent->control->down_right))) {
+
+        bool isAttackHigh = (attackType == ATTACK_JUMPING_PUNCH || attackType == ATTACK_JUMPING_KICK);
+        bool isAttackMid = (attackType == ATTACK_PUNCH || attackType == ATTACK_KICK);
+        bool isAttackLow = (attackType == ATTACK_DOWN_PUNCH || attackType == ATTACK_DOWN_KICK);
+
+        bool isDefendingCorrectly = false;
+
+        // Verifica se a defesa é correta
+        if (isAttackHigh) {
+            if ((opponent->direction == LEFT && opponent->control->left) ||
+                (opponent->direction == RIGHT && opponent->control->right)) {
+                isDefendingCorrectly = true;
+            }
+        } else if (isAttackMid) {
+            if ((opponent->direction == LEFT && (opponent->control->left || opponent->control->down_left)) ||
+                (opponent->direction == RIGHT && (opponent->control->right || opponent->control->down_right))) {
+                isDefendingCorrectly = true;
+            }
+        } else if (isAttackLow) {
+            if ((opponent->direction == LEFT && opponent->control->down_left) ||
+                (opponent->direction == RIGHT && opponent->control->down_right)) {
+                isDefendingCorrectly = true;
+            }
+        }
+
+        if (!isDefendingCorrectly) {
             opponent->health -= damage;
             opponent->isBeingHit = 1;
         } else {
             if (opponent->direction == LEFT) {
                 opponent->isDefending = opponent->control->left ? 1 : 2; // 1 para defendendo em pé, 2 para agachado
             } else {
-                opponent->isDefending = opponent->control->right ? 1 : 2; 
+                opponent->isDefending = opponent->control->right ? 1 : 2;
             }
         }
     }
@@ -405,27 +429,27 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
         switch (p->attack) {
             case ATTACK_KICK:
                 *movement = KICK;
-                check_and_apply_damage(p, opponent, 30, alreadyDamaged, KICK);
+                check_and_apply_damage(p, opponent, 30, alreadyDamaged, KICK, ATTACK_KICK);
                 break;
             case ATTACK_PUNCH:
                 *movement = PUNCH;
-                check_and_apply_damage(p, opponent, 20, alreadyDamaged, PUNCH);
+                check_and_apply_damage(p, opponent, 20, alreadyDamaged, PUNCH, ATTACK_PUNCH);
                 break;
             case ATTACK_JUMPING_KICK:
                 *movement = JUMPING_KICK;
-                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_KICK);
+                check_and_apply_damage(p, opponent, 35, alreadyDamaged, JUMPING_KICK, ATTACK_JUMPING_KICK);
                 break;
             case ATTACK_DOWN_PUNCH:
                 *movement = DOWN_PUNCH;
-                check_and_apply_damage(p, opponent, 25, alreadyDamaged, DOWN_PUNCH);
+                check_and_apply_damage(p, opponent, 25, alreadyDamaged, DOWN_PUNCH, ATTACK_DOWN_PUNCH);
                 break;
             case ATTACK_DOWN_KICK:
                 *movement = DOWN_KICK;
-                check_and_apply_damage(p, opponent, 30, alreadyDamaged, DOWN_KICK);
+                check_and_apply_damage(p, opponent, 30, alreadyDamaged, DOWN_KICK, ATTACK_DOWN_KICK);
                 break;
             case ATTACK_JUMPING_PUNCH:
                 *movement = JUMPING_PUNCH;
-                check_and_apply_damage(p, opponent, 25, alreadyDamaged, JUMPING_PUNCH);
+                check_and_apply_damage(p, opponent, 25, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
                 break;
             default:
                 *alreadyDamaged = 0;
@@ -484,4 +508,11 @@ void update_position(player *player_1, player *player_2, float time) {
 
     updatePlayer(player_1, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
     updatePlayer(player_2, time, Y_SCREEN-SPRITE_HEIGHT, X_SCREEN);
+}
+
+void freePlayer(player *p) {
+    if (p) {
+        joystick_destroy(p->control);
+        free(p);
+    }
 }

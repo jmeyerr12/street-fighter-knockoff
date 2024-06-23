@@ -95,7 +95,6 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 handle_jump(player_1, player_2, &movement1);
                 handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
 
-                //printf("isDefending1: %d\n", player_1->isDefending);
                 if (player_1->isDefending == 1) movement1 = DEFENDING;
                 else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
                 else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
@@ -160,7 +159,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         if (pause_option == MENU) break;
 
 
-        check_v_key_and_print_position(&event, player_1, player_2);
+        //check_v_key_and_print_position(&event, player_1, player_2);
         /* if (timer_count % 120 == 0) { 
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
@@ -274,17 +273,31 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 handle_down(player_1, movement1, &frame1, maxFrame1, timer_count);
                 handle_jump(player_1, player_2, &movement1);
                 handle_attack(player_1, player_2, &movement1, &alreadyDamaged1);
+
+                if (player_1->isDefending == 1) movement1 = DEFENDING;
+                else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
+                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+
                 if (movement1 != previous_movement1) frame1 = 0;
                 maxFrame1 = countFrames(movement1);
                 previous_movement1 = movement1;
+
+                defense(player_2, movement2, &frame2, maxFrame2);
                 being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 handle_down(player_2, movement2, &frame2, maxFrame2, timer_count);
                 handle_jump(player_2, player_1, &movement2);
                 handle_attack(player_2, player_1, &movement2, &alreadyDamaged2);
+             
+                if (player_1->isDefending == 1) movement1 = DEFENDING;
+                else if (player_1->isDefending == 2) movement1 = DEFENDING_DOWN;
+                else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
+
                 if (movement2 != previous_movement2) frame2 = 0;
                 maxFrame2 = countFrames(movement2);
                 previous_movement2 = movement2;
+
+                defense(player_2, movement2, &frame2, maxFrame2);
                 being_hit(player_1, movement1, &frame1, maxFrame1);
 
                 if (timer_count % 4 == 0) {
@@ -319,12 +332,12 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
             }
         }
 
-        if (timer_count % 120 == 0) { 
+        /* if (timer_count % 120 == 0) { 
             printf("\n\n -- %d -- ", timer_count / 30);
             printf("\n---------- %f", al_get_time());
             printPlayerStatistics(player_1, 1);
             printPlayerStatistics(player_2, 2);
-        }
+        } */
     }
 
     al_destroy_timer(timer);

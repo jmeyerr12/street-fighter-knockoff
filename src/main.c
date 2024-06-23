@@ -72,15 +72,13 @@ int main() {
                 }
                 al_destroy_bitmap(player1_sheet);
                 al_destroy_bitmap(player2_sheet);
-                joystick_destroy(player_1->control);
-                joystick_destroy(player_2->control);
-                free(player_1);
-                free(player_2);
+                freePlayer(player_1);
+                freePlayer(player_2);
                 state = ENDGAME;
                 break;
             case SINGLE_PLAYER:
-                player_1 = buildPlayer(61, 10, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, LEFT);
-                player_2 = buildPlayer(61, X_SCREEN-300, Y_SCREEN/2, X_SCREEN, Y_SCREEN, 92, RIGHT);
+                player_1 = buildPlayer(61, 25, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, LEFT);
+                player_2 = buildPlayer(61, X_SCREEN-75, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, RIGHT);
                 show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
@@ -100,10 +98,8 @@ int main() {
                 }
                 al_destroy_bitmap(player1_sheet);
                 al_destroy_bitmap(player2_sheet);
-                joystick_destroy(player_1->control);
-                joystick_destroy(player_2->control);
-                free(player_1);
-                free(player_2);
+                freePlayer(player_1);
+                freePlayer(player_2);
                 state = ENDGAME; 
                 break;
             case ENDGAME:

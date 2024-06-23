@@ -13,9 +13,10 @@
 #include "player_type.h"
 #include "graphics.h"
 
-// Funções de criação e inicialização de jogadores
+// Funções de criação, inicialização e liberação de memória de jogadores
 player* buildPlayer(unsigned int width, unsigned short x, unsigned short y, unsigned short max_x, unsigned short max_y, unsigned int height, int direction); // Cria e inicializa um jogador
 void resetAttributes(player **p, unsigned int width, unsigned int height, unsigned short x, unsigned short y); // Redefine os atributos de um jogador, como dimensões e posição
+void freePlayer(player *p); // Libera a memória alocada para um jogador
 
 // Funções de movimentação e atualização de estado
 void movePlayer(player *element, char steps, unsigned char trajectory); // Move o jogador com base na quantidade de passos e trajetória
@@ -42,7 +43,7 @@ void defense(player *p, int mv, int *frame, int maxFrames); // Lida com o estado
 void handle_jump(player *p, player *opponent, int *movement); // Lida com o movimento de pulo do jogador
 
 // Funções de ataques, dano e recarga de estamina
-void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attackType); // Verifica e aplica dano ao oponente se estiver no alcance do ataque
+void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attack, int attackType); // Verifica e aplica dano ao oponente se estiver no alcance do ataque
 void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamaged); // Lida com os ataques do jogador e verifica o alcance e aplicação de dano
 void recharge_stamina(player* p); // Recarrega a stamina do jogador ao longo do tempo
 
