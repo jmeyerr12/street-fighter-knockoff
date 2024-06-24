@@ -166,8 +166,10 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         if (pause_option == MENU) break;
     }
 
+    if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
+
     // Desenhar o vencedor ao final do jogo
-    if (p1Wins+1 >= 2 || p2Wins+1 >= 2) {
+    if (p1Wins + (isFim == 1 ? 1 : 0) >= 2 || p2Wins + (isFim == 1 ? 1 : 0) >= 2) {
         int winner = (p1Wins > p2Wins) ? 1 : 2;
         int frame = 0;
         int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
@@ -373,7 +375,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
     }
 
     // Desenhar o vencedor ao final do jogo
-    if (p1Wins+1 >= 2 || p2Wins+1 >= 2) {
+    if (p1Wins >= 2 || p2Wins >= 2) {
         int winner = (p1Wins > p2Wins) ? 1 : 2;
         int frame = 0;
         int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração

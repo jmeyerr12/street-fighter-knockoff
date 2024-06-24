@@ -45,7 +45,7 @@ int main() {
         switch (state) {
             case MENU:            
                 draw_menu(font, selected_option); 
-               // if (event.type == ALLEGRO_EVENT_KEY_DOWN)
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN)
                     state = handle_menu_input(event, &selected_option);
                 break;
             case GAME:
@@ -89,11 +89,10 @@ int main() {
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) {
                     int resultado = run_single_player(queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
-                    if (resultado == 0) resultado = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
                     else break; //clicou para sair
-                    
+
                     if ((p1Wins < 2) && (p2Wins < 2)) showWinner(font, resultado);
                     
                     resetAttributes(&player_1, 61, 92, 10, Y_SCREEN/2);
@@ -108,9 +107,10 @@ int main() {
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas
-                if (p1Wins > 2 || p2Wins > 2) showEndgame(font, p1Wins > p2Wins ? 1 : 2);
+                if (p1Wins >= 2 || p2Wins >= 2) showEndgame(font, p1Wins > p2Wins ? 1 : 2);
                 p1Wins = 0; p2Wins = 0;
-                roundCounter = 0;
+                roundCounter = 1;
+                printf("round: %d\n", roundCounter);
                 al_flush_event_queue(queue);
                 state = MENU;
                 break;
