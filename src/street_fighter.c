@@ -1,4 +1,9 @@
 #include "street_fighter.h"
+/* 
+void clearQueue(ALLEGRO_EVENT_QUEUE *queue) {
+    ALLEGRO_EVENT event;
+    while (!al_is_event_queue_empty(queue)) al_get_next_event(queue, &event);
+} */
 
 //retorna 0 em caso de empate, 1 em caso de vitoria do player 1 e 2 em caso de vitoria do player 2
 int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, int* state, char* filename, 
@@ -196,7 +201,6 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
 
     al_destroy_timer(timer);
     destroy_animated_background(&bg);
-    freeCharacterSizes(charSizes);
 
     return isFim;
 }

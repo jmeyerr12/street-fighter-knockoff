@@ -36,10 +36,10 @@ int main() {
     int sel1 = 0,sel2 = 1;
 
     srand(time(NULL));
+    draw_menu(font, selected_option); 
     
     while (state != EXIT) {
         ALLEGRO_EVENT event;
-        draw_menu(font, selected_option); 
         al_wait_for_event(queue, &event);
 
         switch (state) {
@@ -65,7 +65,9 @@ int main() {
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
                     else break; //clicou para sair
+
                     if ((p1Wins < 2) && (p2Wins < 2)) showWinner(font, resultado);
+
                     resetAttributes(&player_1, 61, 92, 10, Y_SCREEN/2);
                     resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
@@ -109,6 +111,7 @@ int main() {
                 if (p1Wins > 2 || p2Wins > 2) showEndgame(font, p1Wins > p2Wins ? 1 : 2);
                 p1Wins = 0; p2Wins = 0;
                 roundCounter = 0;
+                al_flush_event_queue(queue);
                 state = MENU;
                 break;
         }
