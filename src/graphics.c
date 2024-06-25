@@ -12,6 +12,8 @@ void draw_player(ALLEGRO_BITMAP* p, player* player, int current, int movement, i
 }
 
 void draw_scoreboard(int score1, int score2, int x, ALLEGRO_FONT *font, int countdown, int round, int points1, int points2, unsigned int stamina1, unsigned int stamina2) {
+    score1 = (x < 0) ? 0 : score1;
+    score2 = (x < 0) ? 0 : score2;
     int norma_size1=((x/2)-((score1*100)/x)); //pega a porcentagem do tamanho da tela
     int norma_size2=((x/2)+((score2*100)/x));
 
@@ -63,14 +65,20 @@ void draw_menu(ALLEGRO_FONT* font, int selected_option) {
     ALLEGRO_COLOR normal_color = al_map_rgb(255, 255, 255);
     ALLEGRO_COLOR selected_color = al_map_rgb(255, 255, 0);
 
+    float y_start = Y_SCREEN / 3;  // Ponto de partida mais centralizado
+    float y_step = 40;  // Espaço menor entre os itens
+
     al_draw_text(font, selected_option == MENU_START ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Multiplayer");
+                 X_SCREEN / 2, y_start, ALLEGRO_ALIGN_CENTER, "Multiplayer");
 
     al_draw_text(font, selected_option == MENU_SINGLE_PLAYER ? selected_color : normal_color,
-                 X_SCREEN / 2, Y_SCREEN / 2, ALLEGRO_ALIGN_CENTER, "Single Player");
+                 X_SCREEN / 2, y_start + y_step, ALLEGRO_ALIGN_CENTER, "Single Player");
+
+    al_draw_text(font, selected_option == MENU_CONTROLS ? selected_color : normal_color,
+                 X_SCREEN / 2, y_start + 2 * y_step, ALLEGRO_ALIGN_CENTER, "Controls");
 
     al_draw_text(font, selected_option == MENU_EXIT ? selected_color : normal_color,
-                 X_SCREEN / 2, 2 * Y_SCREEN / 3, ALLEGRO_ALIGN_CENTER, "Exit Game");
+                 X_SCREEN / 2, y_start + 3 * y_step, ALLEGRO_ALIGN_CENTER, "Exit Game");
 
     al_flip_display();
 }
@@ -191,6 +199,7 @@ int handle_menu_input(ALLEGRO_EVENT event, int* selected_option) {
             case ALLEGRO_KEY_ENTER:
                 if (*selected_option == MENU_START) return GAME;
                 if (*selected_option == MENU_SINGLE_PLAYER) return SINGLE_PLAYER;
+                if (*selected_option == MENU_CONTROLS) return CONTROLS;
                 if (*selected_option == MENU_EXIT) return EXIT;
                 break;
             case ALLEGRO_KEY_ESCAPE:
@@ -200,7 +209,7 @@ int handle_menu_input(ALLEGRO_EVENT event, int* selected_option) {
     return MENU;
 }
 
-int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
+int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, int *state) {
     int selected_option = 0; // 0 para "Destroyed Dojo", 1 para "Dark Dojo"
     bool done = false;
         
@@ -216,6 +225,11 @@ int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
     while (!done) {
         ALLEGRO_EVENT event;
         al_wait_for_event(queue, &event);
+
+        if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+            *state = EXIT;
+            break;
+        }
 
         update_animated_background(&bg[selected_option]);  // Atualiza a animação do background atual
         al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -245,7 +259,7 @@ int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
     return selected_option; // Retorna a opção selecionada
 }
 
-void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2) {
+void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2, int *state) {
     *selected_option1 = 0;
     *selected_option2 = 1;
 
@@ -261,6 +275,11 @@ void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_s
         al_wait_for_event(queue, &event);
         draw_characters_menu(*selected_option1, *selected_option2, heads, done1, done2);  
         al_clear_to_color(al_map_rgb(0, 0, 0));
+
+        if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+            *state = EXIT;
+            break;
+        }
 
         if (done1 && done2) al_draw_bitmap_region(heads, 0, 276 - 48, 64, 48, (X_SCREEN / 2) - (64 / 2), (Y_SCREEN / 2) - (48 / 2), 0);
         
@@ -416,4 +435,84 @@ void showEndgame(ALLEGRO_FONT *font, int winner) {
     }
     al_flip_display();
     al_rest(1);
+}
+
+void draw_tutorial(ALLEGRO_FONT* font) {
+    al_clear_to_color(al_map_rgb(0, 0, 0));  // Limpa a tela com preto
+
+    ALLEGRO_COLOR text_color = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR player1_color = al_map_rgb(255, 0, 0);
+    ALLEGRO_COLOR player2_color = al_map_rgb(0, 0, 255);
+    ALLEGRO_COLOR divider_color = al_map_rgb(255, 255, 0);
+
+    int item_height = al_get_font_line_height(font);
+    int controls_start_y = 20;  // Posição inicial y
+
+    // Desenha o título
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "PRESSIONE ENTER PARA VOLTAR AO MENU");
+
+    controls_start_y += item_height * 4;
+
+    // Desenha os controles dos jogadores na mesma altura
+    int player_controls_start_y = controls_start_y;
+
+    int player1_x = X_SCREEN / 2 - 5;
+    int player2_x = X_SCREEN / 2 + 5;
+
+    // Desenha os controles do jogador 1
+    al_draw_text(font, player1_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "PLAYER 1");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "W: PULA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "A: ESQUERDA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "S: ABAIXA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "D: DIREITA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "R: SOCO");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "F: CHUTE");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "T: ESPECIAL");
+
+    player_controls_start_y = controls_start_y; // Reset y position for player 2
+
+    // Desenha os controles do jogador 2
+    al_draw_text(font, player2_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "PLAYER 2");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "SETA PARA CIMA: PULA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "SETA PARA ESQUERDA: ESQUERDA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "SETA PARA BAIXO: ABAIXA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "SETA PARA DIREITA: DIREITA");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "P: SOCO");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "L: CHUTE");
+    player_controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "I: ESPECIAL");
+
+    al_draw_line(X_SCREEN / 2, controls_start_y, X_SCREEN / 2, player_controls_start_y + item_height*1.5, divider_color, 2);
+    
+    controls_start_y += item_height * 14; // Posição y para controles gerais
+
+    // Desenha os controles gerais
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "CONTROLES GERAIS");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "Esc: Pause");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "Setas: Navegação no Menu");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "Enter: Selecionar Opção");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "Os ataques podem ser realizados pelo ar e agachado");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "Defesa: Se mover para o lado oposto do oponente");
+    controls_start_y += item_height * 1.5;
+    al_draw_text(font, text_color, X_SCREEN / 2, controls_start_y, ALLEGRO_ALIGN_CENTER, "(pelo ar e agachado)");
+
+    al_flip_display();
 }

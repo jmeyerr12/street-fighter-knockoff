@@ -32,13 +32,14 @@ void showEndgame(ALLEGRO_FONT *font, int winner);
 
 // Funções de controle de menu
 int handle_menu_input(ALLEGRO_EVENT event, int* selected_option); // Lida com a entrada do usuário no menu principal
-int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue); // Mostra o menu de seleção de imagens de fundo
-void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2); // Mostra o menu de seleção de personagens
+int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, int *state); // Mostra o menu de seleção de imagens de fundo
+void show_characters_menu(ALLEGRO_EVENT_QUEUE* queue, ALLEGRO_BITMAP** player1_sheet, ALLEGRO_BITMAP** player2_sheet, int *selected_option1, int *selected_option2, int *state); // Mostra o menu de seleção de personagens
 
 // Funções da tela de fundo
 void init_animated_background(background* bg, float frame_rate, char *filename); // Inicializa o fundo animado com a taxa de quadros e o arquivo especificado
 void update_animated_background(background* bg); // Atualiza o estado do fundo animado para o próximo quadro
 void draw_animated_background(const background* bg); // Desenha o fundo animado na tela
 void destroy_animated_background(background* bg); // Libera a memória alocada para o fundo animado
+void draw_tutorial(ALLEGRO_FONT * font);
 
 #endif

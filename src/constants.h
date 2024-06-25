@@ -61,11 +61,13 @@
 #define SINGLE_PLAYER 2
 #define ENDGAME 3
 #define EXIT 4
+#define CONTROLS 5
 
 // Estados de Menu
 #define MENU_START 0
 #define MENU_SINGLE_PLAYER 1
-#define MENU_EXIT 2
+#define MENU_CONTROLS 2
+#define MENU_EXIT 3
 
 // Codigo dos sprites de personagens
 #define CHUN_LI 0

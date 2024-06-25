@@ -48,8 +48,6 @@ bool isInRange(player *attacker, player *defender, int attack) {
             attacker_right = attacker->SE.x + (attacker->direction==LEFT ? ranges[attacker->sprite][ATTACK_PUNCH-1] : 0);
             attacker_top = attacker->NW.y + top_gaps[attacker->sprite][0];
             attacker_bottom = attacker->SE.y - bottom_gaps[attacker->sprite][0];//- 60;
-            printPlayerStatistics(attacker,1);
-            printPlayerStatistics(defender,2);
             break;
         case KICK:
             attacker_left = attacker->NW.x + (attacker->direction==LEFT ? 0 : -ranges[attacker->sprite][ATTACK_KICK-1]);

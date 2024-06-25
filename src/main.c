@@ -11,7 +11,6 @@ int main() {
     ALLEGRO_DISPLAY* disp = al_create_display(X_SCREEN, Y_SCREEN);
     ALLEGRO_EVENT_QUEUE* queue = al_create_event_queue();
     al_register_event_source(queue, al_get_display_event_source(disp));
-
     al_register_event_source(queue, al_get_keyboard_event_source());
 
     player* player_1; 
@@ -43,7 +42,7 @@ int main() {
         al_wait_for_event(queue, &event);
 
         switch (state) {
-            case MENU:            
+            case MENU:
                 draw_menu(font, selected_option); 
                 if (event.type == ALLEGRO_EVENT_KEY_DOWN)
                     state = handle_menu_input(event, &selected_option);
@@ -51,17 +50,17 @@ int main() {
             case GAME:
                 player_1 = buildPlayer(61, 25, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, LEFT);
                 player_2 = buildPlayer(61, X_SCREEN-75, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, RIGHT);
-                show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
+                show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2,&state);
+                if (state == EXIT) break;
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
-                selected_image = show_image_menu(font, queue);
+                selected_image = show_image_menu(font, queue, &state);
+                if (state == EXIT) break;
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) { 
                     int resultado = run_round(queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
-                    if (resultado == 0) { //em caso de empate o vencedor é sorteado
-                        resultado = 1 + rand() % 2;
-                    }
+                    if (state == EXIT) break; 
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
                     else break; //clicou para sair
@@ -76,19 +75,22 @@ int main() {
                 al_destroy_bitmap(player2_sheet);
                 freePlayer(player_1);
                 freePlayer(player_2);
-                state = ENDGAME;
+                if (state != EXIT) state = ENDGAME;
                 break;
             case SINGLE_PLAYER:
                 player_1 = buildPlayer(61, 25, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, LEFT);
                 player_2 = buildPlayer(61, X_SCREEN-75, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, RIGHT);
-                show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2);
+                show_characters_menu(queue,&player1_sheet,&player2_sheet,&sel1,&sel2,&state);
+                if (state == EXIT) break;
                 player_1->sprite = sel1;
                 player_2->sprite = sel2;
-                selected_image = show_image_menu(font, queue);
+                selected_image = show_image_menu(font, queue, &state);
+                if (state == EXIT) break;
                 if (selected_image == 0) strcpy(filename,"destroyed_dojo");
                 else if (selected_image == 1) strcpy(filename,"dark_dojo");
                 while ((p1Wins < 2) && (p2Wins < 2) && (roundCounter <= 3)) {
                     int resultado = run_single_player(queue, player_1, player_2, &state, filename, font, player1_sheet, player2_sheet, roundCounter, p1Wins, p2Wins); 
+                    if (state == EXIT) break;
                     if (resultado == 1) p1Wins++;
                     else if (resultado == 2) p2Wins++;
                     else break; //clicou para sair
@@ -103,19 +105,24 @@ int main() {
                 al_destroy_bitmap(player2_sheet);
                 freePlayer(player_1);
                 freePlayer(player_2);
-                state = ENDGAME; 
+                if (state != EXIT) state = ENDGAME; 
+                break;
+            case CONTROLS: // Novo caso para exibir os controles
+                draw_tutorial(font);
+                if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ENTER) {
+                    state = MENU;
+                }
                 break;
             case ENDGAME:
                 //mostrar endgame com vencedor e estatisticas
                 if (p1Wins >= 2 || p2Wins >= 2) showEndgame(font, p1Wins > p2Wins ? 1 : 2);
                 p1Wins = 0; p2Wins = 0;
                 roundCounter = 1;
-                printf("round: %d\n", roundCounter);
                 al_flush_event_queue(queue);
                 state = MENU;
                 break;
         }
-        
+
         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
             state = EXIT;
         }
@@ -124,8 +131,9 @@ int main() {
     al_destroy_font(font);
     al_destroy_display(disp);
     al_destroy_event_queue(queue);
-    
+
     return 0;
+
 }
 
 // Arrumar tamanhos (matriz)

@@ -169,10 +169,10 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
 
     // Desenhar o vencedor ao final do jogo
-    if (p1Wins + (isFim == 1 ? 1 : 0) >= 2 || p2Wins + (isFim == 1 ? 1 : 0) >= 2) {
+    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 1 ? 1 : 0) >= 2)) {
         int winner = (p1Wins > p2Wins) ? 1 : 2;
         int frame = 0;
-        int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
+        int maxWinnerFrames = 4;
 
         while (frame < maxWinnerFrames) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -365,17 +365,12 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 al_flip_display();
             }
         }
-
-        /* if (timer_count % 120 == 0) { 
-            printf("\n\n -- %d -- ", timer_count / 30);
-            printf("\n---------- %f", al_get_time());
-            printPlayerStatistics(player_1, 1);
-            printPlayerStatistics(player_2, 2);
-        } */
     }
 
+        if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
+
     // Desenhar o vencedor ao final do jogo
-    if (p1Wins >= 2 || p2Wins >= 2) {
+    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 1 ? 1 : 0) >= 2)) {
         int winner = (p1Wins > p2Wins) ? 1 : 2;
         int frame = 0;
         int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
