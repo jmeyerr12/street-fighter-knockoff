@@ -473,8 +473,6 @@ void draw_tutorial(ALLEGRO_FONT* font) {
     al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "R: SOCO");
     player_controls_start_y += item_height * 1.5;
     al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "F: CHUTE");
-    player_controls_start_y += item_height * 1.5;
-    al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "T: ESPECIAL");
 
     player_controls_start_y = controls_start_y; // Reset y position for player 2
 
@@ -492,8 +490,6 @@ void draw_tutorial(ALLEGRO_FONT* font) {
     al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "P: SOCO");
     player_controls_start_y += item_height * 1.5;
     al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "L: CHUTE");
-    player_controls_start_y += item_height * 1.5;
-    al_draw_text(font, text_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "I: ESPECIAL");
 
     al_draw_line(X_SCREEN / 2, controls_start_y, X_SCREEN / 2, player_controls_start_y + item_height*1.5, divider_color, 2);
     
