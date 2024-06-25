@@ -97,8 +97,8 @@ int main() {
 
                     if ((p1Wins < 2) && (p2Wins < 2)) showWinner(font, resultado);
                     
-                    resetAttributes(&player_1, 61, 92, 10, Y_SCREEN/2);
-                    resetAttributes(&player_2, 61, 92, X_SCREEN-122, Y_SCREEN/2);
+                    resetAttributes(&player_1, 25, Y_SCREEN-112, 10, Y_SCREEN/2);
+                    resetAttributes(&player_2, X_SCREEN-75, Y_SCREEN-112, X_SCREEN-122, Y_SCREEN/2);
                     roundCounter++;
                 }
                 al_destroy_bitmap(player1_sheet);

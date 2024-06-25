@@ -147,7 +147,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 }
 
                 draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins, player_1->stamina, player_2->stamina);
-                if (timer_count % 30 == 0) countdown--;
+                if (timer_count % 45 == 0) countdown--;
 
                 resetPlayer(player_1);
                 resetPlayer(player_2);
@@ -354,7 +354,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
                 }
 
                 draw_scoreboard(player_1->health, player_2->health, X_SCREEN, font, countdown, round, p1Wins, p2Wins, player_1->stamina, player_2->stamina);
-                if (timer_count % 30 == 0) countdown--;
+                if (timer_count % 45 == 0) countdown--;
 
                 resetPlayer(player_1);
                 resetPlayer(player_2);
