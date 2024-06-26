@@ -41,6 +41,7 @@
 #define DEFENDING_DOWN 16
 #define WINNER 17
 #define LOSER 18
+#define SPECIAL 19
 
 // Definições de ataque
 #define ATTACK_PUNCH 1
@@ -49,6 +50,7 @@
 #define ATTACK_DOWN_PUNCH 4
 #define ATTACK_JUMPING_PUNCH 5
 #define ATTACK_DOWN_KICK 6
+#define ATTACK_SPECIAL 7
 
 // Física
 #define STEP 2	
