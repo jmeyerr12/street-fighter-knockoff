@@ -67,7 +67,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         ALLEGRO_KEYBOARD_STATE key_state;
         al_get_keyboard_state(&key_state);
 
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+        if (al_key_down(&key_state, ALLEGRO_KEY_ESCAPE)) {
             running = !running;
             if (running) {
                 lastTime = al_get_time() - pausedTime; // Adjust the timer when resuming
@@ -266,7 +266,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
         ALLEGRO_KEYBOARD_STATE key_state;
         al_get_keyboard_state(&key_state);
         
-        if (event.type == ALLEGRO_EVENT_KEY_DOWN && event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+        if (al_key_down(&key_state, ALLEGRO_KEY_ESCAPE)) {
             running = !running;
             if (running) {
                 lastTime = al_get_time() - pausedTime; // reset the timer when resuming
