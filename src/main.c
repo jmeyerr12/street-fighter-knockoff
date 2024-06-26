@@ -44,8 +44,7 @@ int main() {
         switch (state) {
             case MENU:
                 draw_menu(font, selected_option); 
-                if (event.type == ALLEGRO_EVENT_KEY_DOWN)
-                    state = handle_menu_input(event, &selected_option);
+                state = handle_menu_input(event, &selected_option);
                 break;
             case GAME:
                 player_1 = buildPlayer(61, 25, Y_SCREEN-112, X_SCREEN, Y_SCREEN, 92, LEFT);
