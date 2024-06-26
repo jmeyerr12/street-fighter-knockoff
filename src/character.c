@@ -105,9 +105,7 @@ void printCharacterSizes(size** charSizes) {
 
     // Print header
     printf("%15s", "");
-    for (int j = 0; j < 16; j++) {
-        printf("%15s", states[j]);
-    }
+    for (int j = 0; j < 16; j++) printf("%15s", states[j]);
     printf("\n");
 
     // Print each character's sizes
@@ -509,10 +507,17 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
                 *movement = JUMPING_PUNCH;
                 check_and_apply_damage(p, opponent, 55, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
                 break;
+            case ATTACK_PSYCHO_CRUSHER:
+                printf("psy\n");
+                break;
+            case ATTACK_HADOUKEN:
+                printf("had\n");
+                break;
             default:
                 *alreadyDamaged = 0;
                 break;
         }
+        fflush(stdout);
     }
 }
 

@@ -26,6 +26,8 @@ bool detect_psycho_crusher(const ALLEGRO_KEYBOARD_STATE *keystate) {
 
     if (state == PSYCHO_CRUSHER_IDLE) {
         if (al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
+            printf("idle\n");
+            fflush(stdout);
             state = PSYCHO_CRUSHER_BACK_HELD;
             back_held_time = al_get_time();
         }
@@ -33,16 +35,24 @@ bool detect_psycho_crusher(const ALLEGRO_KEYBOARD_STATE *keystate) {
         if (!al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
             state = PSYCHO_CRUSHER_IDLE;
         } else if (al_get_time() - back_held_time >= CHARGE_TIME) {
+            printf("fwd_press\n");
+            fflush(stdout);
             state = PSYCHO_CRUSHER_FORWARD_PRESSED;
         }
     } else if (state == PSYCHO_CRUSHER_FORWARD_PRESSED) {
         if (al_key_down(keystate, ALLEGRO_KEY_RIGHT)) {
+            printf("deuboa\n");
+            fflush(stdout);
             state = PSYCHO_CRUSHER_PUNCH;
         } else if (!al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
             state = PSYCHO_CRUSHER_IDLE;
         }
     } else if (state == PSYCHO_CRUSHER_PUNCH) {
-        if (al_key_down(keystate, ALLEGRO_KEY_A)) { // A para Soco (Punch)
+        printf("alimento");
+        fflush(stdout);
+        if (al_key_down(keystate, ALLEGRO_KEY_P)) { // A para Soco (Punch)
+            printf("aisim\n");
+            fflush(stdout);
             state = PSYCHO_CRUSHER_IDLE;
             return true; // Psycho Crusher detectado
         } else if (!al_key_down(keystate, ALLEGRO_KEY_RIGHT)) {
@@ -117,14 +127,14 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
             *movement = IDLE;
         }
         
-        if (detect_hadouken(key_state)) {
+        if (p->sprite == KEN && detect_hadouken(key_state)) {
             *movement = SPECIAL;
-            p->attack = ATTACK_SPECIAL;
+            p->attack = ATTACK_HADOUKEN;
         }
 
-        if (detect_psycho_crusher(key_state)) {
+        if (p->sprite == BISON && detect_psycho_crusher(key_state)) {
             *movement = SPECIAL;
-            p->attack = ATTACK_SPECIAL;
+            p->attack = ATTACK_PSYCHO_CRUSHER;
         }
 
         if (p->stamina < 0) p->stamina = 0;

@@ -50,7 +50,8 @@
 #define ATTACK_DOWN_PUNCH 4
 #define ATTACK_JUMPING_PUNCH 5
 #define ATTACK_DOWN_KICK 6
-#define ATTACK_SPECIAL 7
+#define ATTACK_HADOUKEN 7
+#define ATTACK_PSYCHO_CRUSHER 8
 
 // Física
 #define STEP 2	
