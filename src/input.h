@@ -21,6 +21,14 @@ typedef enum {
     PSYCHO_CRUSHER_PUNCH
 } PsychoCrusherState;
 
+typedef enum {
+    HADOUKEN_IDLE,
+    HADOUKEN_DOWN,
+    HADOUKEN_DOWN_FORWARD,
+    HADOUKEN_FORWARD,
+    HADOUKEN_PUNCH
+} HadoukenState;
+
 void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int keys[], int* movement); // Lida com a entrada do teclado para um jogador e atualiza seu movimento
 void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* player_2, int *movement1, int *movement2); // Lida com a entrada do teclado para ambos os jogadores e atualiza seus movimentos
 

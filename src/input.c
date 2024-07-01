@@ -1,61 +1,95 @@
 #include "input.h"
 
-bool detect_hadouken(const ALLEGRO_KEYBOARD_STATE *keystate) {
-    static int sequence_index = 0;
-    static const int HADOUKEN_SEQUENCE[4] = {ALLEGRO_KEY_DOWN, ALLEGRO_KEY_DOWN | ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_A}; // A para Soco (Punch)
+#include "input.h"
+#include "constants.h"
+#include <stdio.h>
 
-    if (al_key_down(keystate, HADOUKEN_SEQUENCE[sequence_index])) {
-        sequence_index++;
-        if (sequence_index >= 4) {
-            sequence_index = 0; // Reset sequence
-            return true; // Hadouken detected
-        }
-    } else {
-        if (sequence_index > 0 && !al_key_down(keystate, HADOUKEN_SEQUENCE[sequence_index - 1])) {
-            sequence_index = 0; // Reset sequence if wrong key is pressed
-        }
+bool detect_hadouken(const ALLEGRO_KEYBOARD_STATE *keystate, player* p, const int keys[]) {
+    static HadoukenState state = HADOUKEN_IDLE;
+    
+    int down_key = keys[3];
+    int forward_key = (p->direction == RIGHT) ? keys[1] : keys[2];
+    int punch_key = keys[4];
+
+    switch (state) {
+        case HADOUKEN_IDLE:
+            if (al_key_down(keystate, down_key)) {
+                state = HADOUKEN_DOWN;
+            }
+            break;
+
+        case HADOUKEN_DOWN:
+            if (al_key_down(keystate, down_key) && al_key_down(keystate, forward_key)) {
+                state = HADOUKEN_DOWN_FORWARD;
+            } else if (!al_key_down(keystate, down_key)) {
+                state = HADOUKEN_IDLE;
+            }
+            break;
+
+        case HADOUKEN_DOWN_FORWARD:
+            if (al_key_down(keystate, forward_key)) {
+                state = HADOUKEN_FORWARD;
+            } else if (!al_key_down(keystate, down_key) || !al_key_down(keystate, forward_key)) {
+                state = HADOUKEN_IDLE;
+            }
+            break;
+
+        case HADOUKEN_FORWARD:
+            if (al_key_down(keystate, punch_key)) {
+                state = HADOUKEN_IDLE;
+                return true; // Hadouken detected
+            } else if (!al_key_down(keystate, forward_key)) {
+                state = HADOUKEN_IDLE;
+            }
+            break;
+
+        default:
+            state = HADOUKEN_IDLE;
+            break;
     }
 
     return false;
 }
 
-bool detect_psycho_crusher(const ALLEGRO_KEYBOARD_STATE *keystate) {
+bool detect_psycho_crusher(const ALLEGRO_KEYBOARD_STATE *keystate, player* p, const int keys[]) {
     static PsychoCrusherState state = PSYCHO_CRUSHER_IDLE;
     static double back_held_time = 0.0;
     static const double CHARGE_TIME = 1.0; // Segure para trás por 1 segundo (ajustar conforme necessário)
 
+    int back_key = (p->direction == RIGHT) ? keys[2] : keys[1]; // Esquerda ou direita baseada na direção
+    int forward_key = (p->direction == RIGHT) ? keys[1] : keys[2]; // Esquerda ou direita baseada na direção
+    int punch_key = keys[4]; // Chave de Soco
+
     if (state == PSYCHO_CRUSHER_IDLE) {
-        if (al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
-            printf("idle\n");
+        if (al_key_down(keystate, back_key)) {
+            printf("back\n");
             fflush(stdout);
             state = PSYCHO_CRUSHER_BACK_HELD;
             back_held_time = al_get_time();
         }
     } else if (state == PSYCHO_CRUSHER_BACK_HELD) {
-        if (!al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
+        if (!al_key_down(keystate, back_key)) {
             state = PSYCHO_CRUSHER_IDLE;
         } else if (al_get_time() - back_held_time >= CHARGE_TIME) {
-            printf("fwd_press\n");
+            printf("tempo\n");
             fflush(stdout);
             state = PSYCHO_CRUSHER_FORWARD_PRESSED;
         }
     } else if (state == PSYCHO_CRUSHER_FORWARD_PRESSED) {
-        if (al_key_down(keystate, ALLEGRO_KEY_RIGHT)) {
-            printf("deuboa\n");
+        if (al_key_down(keystate, forward_key)) {
+            printf("fwd\n");
             fflush(stdout);
             state = PSYCHO_CRUSHER_PUNCH;
-        } else if (!al_key_down(keystate, ALLEGRO_KEY_LEFT)) {
+        } else if (!al_key_down(keystate, back_key)) {
             state = PSYCHO_CRUSHER_IDLE;
         }
     } else if (state == PSYCHO_CRUSHER_PUNCH) {
-        printf("alimento");
-        fflush(stdout);
-        if (al_key_down(keystate, ALLEGRO_KEY_P)) { // A para Soco (Punch)
-            printf("aisim\n");
-            fflush(stdout);
+        if (al_key_down(keystate, punch_key)) {
             state = PSYCHO_CRUSHER_IDLE;
+            printf("da soco\n");
+            fflush(stdout);
             return true; // Psycho Crusher detectado
-        } else if (!al_key_down(keystate, ALLEGRO_KEY_RIGHT)) {
+        } else if (!al_key_down(keystate, forward_key)) {
             state = PSYCHO_CRUSHER_IDLE;
         }
     }
@@ -127,12 +161,12 @@ void handle_player_input(ALLEGRO_KEYBOARD_STATE* key_state, player* p, const int
             *movement = IDLE;
         }
         
-        if (p->sprite == KEN && detect_hadouken(key_state)) {
+        if (p->sprite == KEN && detect_hadouken(key_state, p, keys)) {
             *movement = SPECIAL;
             p->attack = ATTACK_HADOUKEN;
         }
 
-        if (p->sprite == BISON && detect_psycho_crusher(key_state)) {
+        if (p->sprite == BISON && detect_psycho_crusher(key_state, p, keys)) {
             *movement = SPECIAL;
             p->attack = ATTACK_PSYCHO_CRUSHER;
         }
@@ -156,6 +190,6 @@ void handle_input(ALLEGRO_KEYBOARD_STATE* key_state, player* player_1, player* p
     const int player2_keys[] = {ALLEGRO_KEY_UP, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_P, ALLEGRO_KEY_L};
 
     // Manipulação de input dos jogadores
-    handle_player_input(key_state, player_1, player1_keys, movement1);
-    handle_player_input(key_state, player_2, player2_keys, movement2);
+    if (player_1->attack == 0) handle_player_input(key_state, player_1, player1_keys, movement1);
+    if (player_1->attack == 0) handle_player_input(key_state, player_2, player2_keys, movement2);
 }

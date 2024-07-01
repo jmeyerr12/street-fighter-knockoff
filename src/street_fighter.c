@@ -107,7 +107,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 else if (movement1 == DEFENDING_DOWN) movement1 = GET_DOWN; 
 
                 if (movement1 != previous_movement1) frame1 = 0;
-                maxFrame1 = countFrames(movement1);
+                maxFrame1 = countFrames(movement1 + (player_1->attack == ATTACK_HADOUKEN ? 1 : 0));
                 previous_movement1 = movement1;
 
                 defense(player_1, movement1, &frame1, maxFrame1);
@@ -122,7 +122,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
                 else if (movement2 == DEFENDING_DOWN) movement2 = GET_DOWN; 
 
                 if (movement2 != previous_movement2) frame2 = 0;
-                maxFrame2 = countFrames(movement2);
+                maxFrame2 = countFrames(movement2+ (player_2->attack == ATTACK_HADOUKEN ? 1 : 0));
                 previous_movement2 = movement2;
                 defense(player_2, movement2, &frame2, maxFrame2);
                 being_hit(player_2, movement2, &frame2, maxFrame2);

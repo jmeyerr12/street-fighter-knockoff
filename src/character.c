@@ -395,6 +395,12 @@ int countFrames(int movement) {
         case DEFENDING_DOWN:
             return 2;
             break;
+        case SPECIAL:
+            return 8;
+            break;
+        case SPECIAL+1:
+            return 4;
+            break;
         default:
             return -100;
             break;
@@ -442,7 +448,7 @@ void handle_jump(player *p, player *opponent, int *movement) {
 void check_and_apply_damage(player *p, player *opponent, int damage, int *alreadyDamaged, int attack, int attackType) {
     if (isInRange(p, opponent, attack) && !(*alreadyDamaged)) {
         *alreadyDamaged = 1;
-
+        
         bool isAttackHigh = (attackType == ATTACK_JUMPING_PUNCH || attackType == ATTACK_JUMPING_KICK);
         bool isAttackMid = (attackType == ATTACK_PUNCH || attackType == ATTACK_KICK);
         bool isAttackLow = (attackType == ATTACK_DOWN_PUNCH || attackType == ATTACK_DOWN_KICK);
@@ -481,7 +487,7 @@ void check_and_apply_damage(player *p, player *opponent, int damage, int *alread
 }
 
 void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamaged) {
-    if (p->stamina - STAMINA_DECREASE >= 0) {
+    if (p->stamina - STAMINA_DECREASE >= 0 && p->attack) {
         switch (p->attack) {
             case ATTACK_KICK:
                 *movement = KICK;
@@ -508,10 +514,15 @@ void handle_attack(player *p, player *opponent, int *movement, int *alreadyDamag
                 check_and_apply_damage(p, opponent, 55, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
                 break;
             case ATTACK_PSYCHO_CRUSHER:
-                printf("psy\n");
+                p->speed_x = (p->direction == LEFT ? 5 : -5);
+                p->y = Y_SCREEN-150;
+                *movement = SPECIAL;
+                check_and_apply_damage(p, opponent, 100, alreadyDamaged, JUMPING_PUNCH, ATTACK_JUMPING_PUNCH);
+                printf("psy\n"); //debugar aparencia da certo, corrigir tamanhos e sistema de dano
                 break;
             case ATTACK_HADOUKEN:
-                printf("had\n");
+                *movement = SPECIAL;
+                //printf("had\n");
                 break;
             default:
                 *alreadyDamaged = 0;
