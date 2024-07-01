@@ -9,7 +9,8 @@ void try_move_player(player *p, player *other, int multiplier, int direction) {
 
     // Se a nova posição resultar em uma colisão, reverta para a posição original
     if (collision_players(p, other)) {
-        p->x = original_x;
+        p->x = original_x + (p->direction == LEFT ?  1 : -1);
+        other->x = other->x + (p->direction == LEFT ? 1 : -1);
     }
 }
 
