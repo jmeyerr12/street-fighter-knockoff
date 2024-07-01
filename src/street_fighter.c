@@ -70,9 +70,9 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         if (al_key_down(&key_state, ALLEGRO_KEY_ESCAPE)) {
             running = !running;
             if (running) {
-                lastTime = al_get_time() - pausedTime; // Adjust the timer when resuming
+                lastTime = al_get_time() - pausedTime; // ajusta tempo para retomar execucao
             } else {
-                pausedTime = al_get_time() - lastTime; // Record the time when pausing
+                pausedTime = al_get_time() - lastTime; // pausa tempo no pause 
             }
         }
 
@@ -160,7 +160,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
         } else {
             pause_option = draw_pause(font, queue);
             running = 1;
-            lastTime = al_get_time() - pausedTime; // Reset the timer when resuming
+            lastTime = al_get_time() - pausedTime; // reseta tempo ao voltar
         }
 
         if (pause_option == MENU) break;
@@ -169,8 +169,8 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
     if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
 
     // Desenhar o vencedor ao final do jogo
-    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 1 ? 1 : 0) >= 2)) {
-        int winner = (p1Wins > p2Wins) ? 1 : 2;
+    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 2 ? 1 : 0) >= 2)) {
+        int winner = ((p1Wins + (isFim == 1 ? 1 : 0)) > (p2Wins + (isFim == 2 ? 1 : 0))) ? 1 : 2;
         int frame = 0;
         int maxWinnerFrames = 4;
 
@@ -187,7 +187,7 @@ int run_round(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* player_2, in
             }
 
             al_flip_display();
-            al_rest(0.5); // Tempo entre os quadros da animação
+            al_rest(1); // Tempo entre os quadros da animação
             frame++;
         }
 
@@ -269,13 +269,13 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
         if (al_key_down(&key_state, ALLEGRO_KEY_ESCAPE)) {
             running = !running;
             if (running) {
-                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
+                lastTime = al_get_time() - pausedTime; // reseta tempo ao voltar
             } else {
-                pausedTime = al_get_time() - lastTime; // record the time when pausing
+                pausedTime = al_get_time() - lastTime; // guarda tempo ao pausar
                 int pause_option = draw_pause(font, queue);
                 if (pause_option == MENU) break;
                 running = 1;
-                lastTime = al_get_time() - pausedTime; // reset the timer when resuming
+                lastTime = al_get_time() - pausedTime;  // reseta tempo ao voltar
             }
         }
 
@@ -367,13 +367,13 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
         }
     }
 
-        if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
+    if (isFim == 0) isFim = 1 + rand() % 2;  //em caso de empate o vencedor é sorteado
 
     // Desenhar o vencedor ao final do jogo
-    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 1 ? 1 : 0) >= 2)) {
-        int winner = (p1Wins > p2Wins) ? 1 : 2;
+    if ((p1Wins + (isFim == 1 ? 1 : 0) >= 2) || (p2Wins + (isFim == 2 ? 1 : 0) >= 2)) {
+        int winner = ((p1Wins + (isFim == 1 ? 1 : 0)) > (p2Wins + (isFim == 2 ? 1 : 0))) ? 1 : 2;
         int frame = 0;
-        int maxWinnerFrames = 4; // Supondo que haja 4 quadros de animação para a comemoração
+        int maxWinnerFrames = 4;
 
         while (frame < maxWinnerFrames) {
             al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -388,7 +388,7 @@ int run_single_player(ALLEGRO_EVENT_QUEUE* queue, player* player_1, player* play
             }
 
             al_flip_display();
-            al_rest(0.5); // Tempo entre os quadros da animação
+            al_rest(1); // Tempo entre os quadros da animação
             frame++;
         }
 

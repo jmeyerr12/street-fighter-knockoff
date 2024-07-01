@@ -1,5 +1,3 @@
-//Compilação: gcc main.c character.c joystick.c street_fighter.c -o AS $(pkg-config allegro-5 allegro_main-5 allegro_font-5 allegro_primitives-5 allegro_image-5 --libs --cflags)
-
 #include "street_fighter.h"		
 
 int main() {
@@ -121,7 +119,7 @@ int main() {
                 state = MENU;
                 break;
         }
-
+        al_flush_event_queue(queue);
         if (event.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
             state = EXIT;
         }
@@ -134,7 +132,3 @@ int main() {
     return 0;
 
 }
-
-// Arrumar tamanhos (matriz)
-// Investigar, com tudo 60 da certo, com os valores setados na mão ele da problema no ataque (chun li(tamanhos variados) vs ken (tamanho tudo 60))
-// Arrumar overlap_y no ataque, quando se abaixa nao esta funcionando, toma dano de soco que nao atinge

@@ -113,9 +113,6 @@ int draw_pause(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue) {
                 case ALLEGRO_KEY_ENTER:
                     done = true; // Sai do loop ao pressionar ENTER
                     break;
-                case ALLEGRO_KEY_ESCAPE:
-                    done = true; // Sai do loop ao pressionar ESCAPE
-                    break;
             }
 
             al_draw_filled_rectangle(X_SCREEN * 0.4, Y_SCREEN * 0.25, X_SCREEN * 0.6, Y_SCREEN * 0.6, al_map_rgb(0, 0, 0));
@@ -202,8 +199,6 @@ int handle_menu_input(ALLEGRO_EVENT event, int* selected_option) {
                 if (*selected_option == MENU_CONTROLS) return CONTROLS;
                 if (*selected_option == MENU_EXIT) return EXIT;
                 break;
-            case ALLEGRO_KEY_ESCAPE:
-                return EXIT;
         }
     }
     return MENU;
@@ -243,9 +238,6 @@ int show_image_menu(ALLEGRO_FONT* font, ALLEGRO_EVENT_QUEUE* queue, int *state) 
                     break;
                 case ALLEGRO_KEY_ENTER:
                     done = true; // Saída do loop ao pressionar ENTER
-                    break;
-                case ALLEGRO_KEY_ESCAPE:
-                    done = true; // Saída do loop ao pressionar ESCAPE
                     break;
             }
         }
@@ -474,7 +466,7 @@ void draw_tutorial(ALLEGRO_FONT* font) {
     player_controls_start_y += item_height * 1.5;
     al_draw_text(font, text_color, player1_x, player_controls_start_y, ALLEGRO_ALIGN_RIGHT, "F: CHUTE");
 
-    player_controls_start_y = controls_start_y; // Reset y position for player 2
+    player_controls_start_y = controls_start_y; // reset y position for player 2
 
     // Desenha os controles do jogador 2
     al_draw_text(font, player2_color, player2_x, player_controls_start_y, ALLEGRO_ALIGN_LEFT, "PLAYER 2");

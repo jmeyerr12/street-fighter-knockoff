@@ -123,7 +123,7 @@ void handle_bot_input(player* p1, player* p2, int* movement, int timer_count) {
 
     } else {
         // Estado normal, comportamento padrão
-        if (abs(distance) > 50) {
+        if (abs(distance) > 30) {
             if (distance > 10) {
                 joystick_right(p2->control);
             } else {
